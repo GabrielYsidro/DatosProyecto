@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Bottle App</title>
+    <title>Proyecto Datos</title>
 </head>
 <body>
-    <h1>Hello from Bottle!</h1>
+    <h1>Hola como estamos</h1>
 </body>
 </html>

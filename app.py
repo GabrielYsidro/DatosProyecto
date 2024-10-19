@@ -1,10 +1,15 @@
-from bottle import Bottle, run, template
 
-app = Bottle()
+from flask import Flask, render_template as template
+
+app = Flask(__name__)
+
+@app.route('/caca')
+def home():
+    return "<h1>El dia de hoy he muerto </h1>"
 
 @app.route('/')
-def home():
-    return template('index')
+def index():
+    return template('index.tpl')
 
 if __name__ == '__main__':
-    run(app, host='localhost', port=8080, debug=True)
+    app.run(debug=True)
