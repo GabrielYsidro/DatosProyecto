@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 @app.route('/caca')
 def home():
-    return "<h1>El dia de hoy he muerto </h1>"
+    return "<h1> Los peques</h1>"
 
 @app.route('/')
 def index():
@@ -13,3 +13,4 @@ def index():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
