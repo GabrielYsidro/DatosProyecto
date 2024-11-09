@@ -17,7 +17,7 @@
     let formData = writable({
     name: '',
     email: '',
-    fileUrl: '',
+    uploadedFileUrl: '',
     password: '',
     resumen: '',
     descripcion: ''
@@ -104,7 +104,7 @@
         {/if}
     </div>
     
-    <CargaArchivo bind:fileUrl={$formData.fileUrl} />
+    <CargaArchivo bind:uploadedFileUrl={$formData.uploadedFileUrl} />
 
     <button type="submit" disabled={$isSubmitting}>Enviar</button>
 </form>

@@ -26,10 +26,13 @@ def uploadFile():
     file_path = os.path.join(app.config['FOLDER_SUBIDA'], file.filename)
     file.save(file_path)
     
-    file_url = f'http://localhost:5000/upload/{file.filename}'
-    print(file_url)
+    file_url = f'http://localhost:5000/files/{file.filename}'
     return jsonify({'success': True, 'message': 'Archivo subido exitosamente', 'file_url': file_url}), 200
 
+@app.route('/files/<filename>')
+def serve_file(filename):
+    # Servir el archivo desde el directorio 'subidas'
+    return send_from_directory(app.config['FOLDER_SUBIDA'], filename)
 
 @app.route('/')
 def index():

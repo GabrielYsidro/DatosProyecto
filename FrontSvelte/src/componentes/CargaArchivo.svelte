@@ -2,8 +2,8 @@
     import { uploadFile } from '../servicios/subirArchivo.js';
     
     let file = null;
-    let uploadedFileUrl = '';
-
+    export let uploadedFileUrl = '';
+    let errorMessage = '';
     //Se envian los datos al server en Flask
     const tratarCarga = async () => {
         if (!file) {
@@ -11,14 +11,19 @@
         }
         try {
             const result = await uploadFile(file);
-            uploadedFileUrl = result.fileUrl; // Asumiendo que el servidor devuelve la URL del archivo
-            console.log(uploadedFileUrl)
+            if (result.success) {
+                uploadedFileUrl = result.file_url; // Asumiendo que el servidor devuelve la URL del archivo
+            } else {
+                errorMessage = result.message || 'Error desconocido';
+            }
+            console.log(uploadedFileUrl);
         } catch (error) {
             console.error('Error al cargar el archivo:', error);
         }
     }
     const tratarCambios = (e) => {
             file = e.target.files[0];
+            errorMessage = '';
         }
 </script>
 
@@ -32,5 +37,8 @@
     <p>Archivo subido correctamente. Visualizar 
         <a href = {uploadedFileUrl} target="_blank">aquí</a>
     </p>
+    {/if}
+    {#if errorMessage}
+        <p style="color: red;">{errorMessage}</p>
     {/if}
 </div>
