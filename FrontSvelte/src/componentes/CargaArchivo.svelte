@@ -27,11 +27,23 @@
         }
 </script>
 
+<style>
+    #file {
+        margin-bottom: 1em;
+    }
+    .carga {
+        margin: auto;
+        width: 60%;
+        text-align: center;
+        padding-bottom: 2rem;
+    }
+</style>
+
 <!-- Aqui se carga el archivo-->
 
-<div>
+<div class="carga">
     <label for="file">Seleccionar archivo: </label>
-    <input type="file" id="file" on:change={tratarCambios} />
+    <input type="file" id="file" on:change={tratarCambios} /><br>
     <button on:click={tratarCarga}>Subir archivo</button>
     {#if uploadedFileUrl}
     <p>Archivo subido correctamente. Visualizar 

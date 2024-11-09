@@ -57,54 +57,99 @@
     color: red;
     font-size: 0.9em;
     }
+    form, h1 {
+        margin: auto;
+        width: 60%;
+        text-align: center;
+    }
+    h1 {
+        padding-top: 1em;
+        font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+        padding-bottom: 1em;
+        color:rgb(96, 100, 82);
+        -webkit-text-stroke: 1.5px black;
+    }
+    div {
+        margin-bottom: 2em;
+        font-size: 1.2em;
+    }
+
+    .principal {
+        background-color: rgb(255, 250, 180);
+        border-radius: 2em;
+        height:100%;
+    }
+
+    #name, #email, #password, #resumen, #descripcion {
+        width: 80%;
+        font-size: 1em;
+        border-radius: 0.4em;
+    }
+    #descripcion {
+        max-width: 80%;
+        min-height: 3em;
+        max-height: 10em;
+        height: 7em;
+    }
+
+    .envio {
+        background-color: rgb(96, 100, 82);
+        color: white;
+        padding: 0.5em 1em;
+        border-radius: 0.4em;
+        font-size: 1.2em;
+        cursor: pointer;
+    }
 </style>
 
 
 <!-- Esta es la estructura principal del archivo-->
+
+<div class="principal">
 <h1>Formulario de contacto</h1>
-
-<form on:submit|preventDefault={handleSubmit}>
-    <div>
-    <label for="name">Nombre:</label>
-    <input id="name" type="text" bind:value={$formData.name} />
-    {#if $formErrors.name}
-        <span class="error">{$formErrors.name}</span>
-    {/if}
-    </div>
-
-    <div>
-    <label for="email">Correo electrónico:</label>
-    <input id="email" type="email" bind:value={$formData.email} />
-    {#if $formErrors.email}
-        <span class="error">{$formErrors.email}</span>
-    {/if}
-    </div>
-
-    <div>
-        <label for="password"> Password: </label>
-        <input id="password" type="password" bind:value={$formData.password} />
-        {#if $formErrors.password}
-            <span class="error">{$formErrors.password}</span>
+    <form on:submit|preventDefault={handleSubmit}>
+        <div>
+        <label for="name">Nombre:</label><br>
+        <input id="name" type="text" bind:value={$formData.name} />
+        {#if $formErrors.name}
+            <span class="error">{$formErrors.name}</span>
         {/if}
-    </div>
-
-    <div> 
-        <label for="resumen"> Cual es el problema? Escriba el titulo: </label>
-        <input id="resumen" type="text" bind:value={$formData.resumen} />
-        {#if $formErrors.resumen}
-            <span class="error">{$formErrors.resumen}</span>
-        {/if}
-    </div>
-
-    <div>
-        <label for="descripcion">Describa el problema</label>
-        <textarea id="descripcion" bind:value={$formData.descripcion}></textarea>
-        {#if $formErrors.descripcion}
-            <span class="error">{$formErrors.descripcion}</span>
-        {/if}
-    </div>
+        </div>
     
-    <CargaArchivo bind:uploadedFileUrl={$formData.uploadedFileUrl} />
-
-    <button type="submit" disabled={$isSubmitting}>Enviar</button>
-</form>
+        <div>
+        <label for="email">Correo electrónico:</label><br>
+        <input id="email" type="email" bind:value={$formData.email} />
+        {#if $formErrors.email}
+            <span class="error">{$formErrors.email}</span>
+        {/if}
+        </div>
+    
+        <div>
+            <label for="password"> Password: </label><br>
+            <input id="password" type="password" bind:value={$formData.password} />
+            {#if $formErrors.password}
+                <span class="error">{$formErrors.password}</span>
+            {/if}
+        </div>
+    
+        <div> 
+            <label for="resumen"> Cual es el problema? Escriba el titulo: </label><br>
+            <input id="resumen" type="text" bind:value={$formData.resumen} />
+            {#if $formErrors.resumen}
+                <span class="error">{$formErrors.resumen}</span>
+            {/if}
+        </div>
+    
+        <div>
+            <label for="descripcion">Describa el problema</label><br>
+            <textarea id="descripcion" bind:value={$formData.descripcion}></textarea>
+            {#if $formErrors.descripcion}
+                <span class="error">{$formErrors.descripcion}</span>
+            {/if}
+        </div>
+        
+        <CargaArchivo bind:uploadedFileUrl={$formData.uploadedFileUrl} />
+    
+        <button class="envio" type="submit" disabled={$isSubmitting}>Enviar</button>
+    </form>
+</div>
