@@ -14,6 +14,7 @@ app.config['FOLDER_SUBIDA'] = FOLDER_SUBIDA
 if not os.path.exists(FOLDER_SUBIDA):
     os.makedirs(FOLDER_SUBIDA)
 
+#Endpoint para subir archivos y devolver URL de descarga
 @app.route('/upload', methods=['POST'])
 def uploadFile():
     if 'file' not in request.files:
@@ -29,6 +30,8 @@ def uploadFile():
     file_url = f'http://localhost:5000/files/{file.filename}'
     return jsonify({'success': True, 'message': 'Archivo subido exitosamente', 'file_url': file_url}), 200
 
+
+#Endpoint para descargar archivos
 @app.route('/files/<filename>')
 def serve_file(filename):
     # Servir el archivo desde el directorio 'subidas'
