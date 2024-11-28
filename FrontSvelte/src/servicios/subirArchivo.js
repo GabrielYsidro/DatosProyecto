@@ -11,7 +11,6 @@ export async function uploadFile(file) {
       if (!response.ok) {
         throw new Error('Error al subir el archivo');
       }
-  
       const data = await response.json();
       return data; // Retorna la respuesta del servidor (por ejemplo, URL del archivo)
     } catch (error) {
