@@ -6,7 +6,7 @@ import sqlite3
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}})
 
 FOLDER_SUBIDA = 'subidas'
 app.config['FOLDER_SUBIDA'] = FOLDER_SUBIDA
@@ -66,4 +66,17 @@ def obtenerRecurso(recurso):
         return jsonify({"error": str(e)}), 400
     conn.close()
     return jsonify(resultado)
+
+@app.route('/clienteDB', methods=['POST'])
+def clienteDB():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No se enviaron datos"}), 400
+    
+    print("Datos recibidos:", data)
+    
+    
+    
+    return jsonify({"success:" : True, "message": "Datos recibidos" }), 200
+
 

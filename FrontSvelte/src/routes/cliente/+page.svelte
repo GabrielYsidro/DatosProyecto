@@ -1,7 +1,4 @@
 
-
-
-
 <!-- Aqui se definen los estados y la funcion de envio de datos a la API -->
 <script>
     import { writable } from 'svelte/store';
@@ -12,9 +9,9 @@
 
 
     let proyectos = []
-    let selectedResource = ''
+    let selectedResource = writable('');
 
-    
+
     onMount(async () => {
         proyectos = await fetchRecurso("proyectos");
         console.log(proyectos)
@@ -36,7 +33,14 @@
     resumen: '',
     descripcion: '',
     ruc: '',
-    proyecto : selectedResource
+    proyecto : ''
+    });
+
+    selectedResource.subscribe(value => {
+        formData.update(data => {
+            data.proyecto = value;
+            return data;
+        });
     });
 
     let formErrors = writable({});
@@ -57,16 +61,27 @@
         return acc;
         }, {}));
     } else {
-        // Aquí iría el código para enviar los datos si la validación es exitosa
         console.log("Formulario válido:", $formData);
+        const response = await fetch("http://localhost:5000/clienteDB", {
+            method : "POST",
+            headers: {
+                    "Content-Type": "application/json"
+                },
+            body : JSON.stringify($formData)
+        });
+
+        if(!response.ok) {
+
+        }
+
     }
 
     isSubmitting.set(false);
     };
 
     function handleChange(event) {
-        selectedResource = event.target.value;
-        console.log('Recurso seleccionado:', selectedResource);
+        selectedResource.set(event.target.value)
+        console.log('Recurso seleccionado:', event.target.value);
     }
 </script>
 
@@ -164,10 +179,10 @@
     
         <div> 
             <label for="proyectos"> Seleccione el producto sobre el que tiene una consulta: </label><br>
-            <select id="proyectos" autocomplete="on" bind:value={selectedResource} on:change={handleChange}>
+            <select id="proyectos" autocomplete="on" bind:value={$selectedResource} on:change={handleChange}>
                 <option value="" disabled>Selecciona un recurso</option>
                 {#each proyectos as resource}
-                    <option value={resource.nombre}>{resource.nombre}</option>
+                    <option value={resource.id}>{resource.nombre}</option>
                 {/each}
             </select>
         </div>
