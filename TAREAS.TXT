@@ -1,0 +1,30 @@
+FRONT:
+-Opcional: Login
+
+-Formatear TODO lo del dev.
+    1.- Comentar
+    2.- Resolver request
+
+----
+
+
+BACK:
+
+
+Cliente:
+-> Recibir cosas del cliente y meterlo a DB
+
+
+Admin:
+-> Asignar prioridades y devs a cada proyecto (desde ADMIN)
+
+DB:
+-> Inserts a todas las tablas
+-> Hacer funciones de PL/SQL
+-> Hacer triggers
+
+
+Dev:
+-> Desde la vida del DEV, se debe mostrar en una tabla todas
+las incidencias que se le han asignado a su departamento
+

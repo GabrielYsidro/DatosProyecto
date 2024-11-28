@@ -4,7 +4,18 @@
     import { writable } from 'svelte/store';
     import { z } from 'zod';
     import CargaArchivo from '../../componentes/CargaArchivo.svelte';
+    import {fetchRecurso} from '../../servicios/buscarRecurso'
+    import {onMount} from 'svelte'
 
+
+    let proyectos = []
+    let selectedResource = writable('');
+
+
+    onMount(async () => {
+        proyectos = await fetchRecurso("proyectos");
+        console.log(proyectos)
+    });
     // Definir el esquema de validación usando Zod
     const formSchema = z.object({
     name: z.string().min(1, "El nombre es requerido").max(50, "El nombre debe tener menos de 50 caracteres"),
@@ -12,7 +23,7 @@
     password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres").regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/, "La contraseña debe contener al menos una letra mayúscula, una letra minúscula y un número"),
     resumen: z.string().min(1, "El resumen es requerido").max(50, "El resumen debe tener menos de 50 caracteres"),
     descripcion: z.string().min(1, "La descripción es requerida").max(500, "La descripción debe tener menos de 500 caracteres"),
-    });
+    ruc: z.string().min(10,"Minimo 11 digitos").max("Maximo 11 digitos").regex(/^\d+$/, "Solo numeros")});
     // Estado para el formulario
     let formData = writable({
     name: '',
@@ -20,7 +31,16 @@
     uploadedFileUrl: '',
     password: '',
     resumen: '',
-    descripcion: ''
+    descripcion: '',
+    ruc: '',
+    proyecto : ''
+    });
+
+    selectedResource.subscribe(value => {
+        formData.update(data => {
+            data.proyecto = value;
+            return data;
+        });
     });
 
     let formErrors = writable({});
@@ -41,12 +61,28 @@
         return acc;
         }, {}));
     } else {
-        // Aquí iría el código para enviar los datos si la validación es exitosa
         console.log("Formulario válido:", $formData);
+        const response = await fetch("http://localhost:5000/clienteDB", {
+            method : "POST",
+            headers: {
+                    "Content-Type": "application/json"
+                },
+            body : JSON.stringify($formData)
+        });
+
+        if(!response.ok) {
+
+        }
+
     }
 
     isSubmitting.set(false);
     };
+
+    function handleChange(event) {
+        selectedResource.set(event.target.value)
+        console.log('Recurso seleccionado:', event.target.value);
+    }
 </script>
 
 
@@ -80,7 +116,7 @@
         height:100%;
     }
 
-    #name, #email, #password, #resumen, #descripcion {
+    #name, #email, #password, #resumen, #descripcion, #ruc {
         width: 80%;
         font-size: 1em;
         border-radius: 0.4em;
@@ -131,7 +167,26 @@
                 <span class="error">{$formErrors.password}</span>
             {/if}
         </div>
+
+
+        <div>
+            <label for="ruc"> RUC: </label><br>
+            <input id="ruc" type="ruc" bind:value={$formData.ruc} />
+            {#if $formErrors.ruc}
+                <span class="error">{$formErrors.ruc}</span>
+            {/if}
+        </div>
     
+        <div> 
+            <label for="proyectos"> Seleccione el producto sobre el que tiene una consulta: </label><br>
+            <select id="proyectos" autocomplete="on" bind:value={$selectedResource} on:change={handleChange}>
+                <option value="" disabled>Selecciona un recurso</option>
+                {#each proyectos as resource}
+                    <option value={resource.id}>{resource.nombre}</option>
+                {/each}
+            </select>
+        </div>
+
         <div> 
             <label for="resumen"> Cual es el problema? Escriba el titulo: </label><br>
             <input id="resumen" type="text" bind:value={$formData.resumen} />
