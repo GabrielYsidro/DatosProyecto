@@ -178,11 +178,11 @@
         </div>
     
         <div> 
-            <label for="proyectos"> Seleccione el producto sobre el que tiene una consulta: </label><br>
+            <label for="proyectos"> Seleccione el proyecto sobre el que tiene una consulta: </label><br>
             <select id="proyectos" autocomplete="on" bind:value={$selectedResource} on:change={handleChange}>
                 <option value="" disabled>Selecciona un recurso</option>
                 {#each proyectos as resource}
-                    <option value={resource.id}>{resource.nombre}</option>
+                    <option value={resource.nombre}>{resource.nombre}</option>
                 {/each}
             </select>
         </div>

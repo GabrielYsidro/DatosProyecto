@@ -48,12 +48,8 @@ def serve_file(filename):
 def index():
     return template('index.tpl')
 
-if __name__ == '__main__':
-    app.run(debug=True)
-    
-
 @app.route('/api/<recurso>',methods=['GET'])
-def obtenerRecurso(recurso):
+def obtenerRecurso(recurso):    
     conn = conectarDB()
     cursor = conn.cursor()
     try:
@@ -79,4 +75,5 @@ def clienteDB():
     
     return jsonify({"success:" : True, "message": "Datos recibidos" }), 200
 
-
+if __name__ == '__main__':
+    app.run(debug=True)

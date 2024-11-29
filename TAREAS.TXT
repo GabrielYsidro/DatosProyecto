@@ -28,3 +28,11 @@ Dev:
 -> Desde la vida del DEV, se debe mostrar en una tabla todas
 las incidencias que se le han asignado a su departamento
 
+
+-> Interaccion con tablas fuertes, debiles y asociativas
+
+-Fuertes: Clientes -> Documentos, incidencias
+
+-Debiles: Modificar el estado de la incidencia, asignar developers a incidencia
+
+-Asociativas: Filtros 
