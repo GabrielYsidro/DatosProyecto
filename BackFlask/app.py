@@ -64,6 +64,7 @@ def obtenerRecurso(recurso):
     conn.close()
     return jsonify(resultado)
 
+#Ruta para postear datos de cliente
 @app.route('/clienteDB', methods=['POST'])
 def clienteDB():
     data = request.get_json()
@@ -112,6 +113,19 @@ def clienteDB():
         conn.close()
     
     return jsonify(response)
+
+@app.route('/api/incidencias/<int:id>')
+def get_incidencia(id):
+    conn =conectarDB()
+    incidencia = conn.execute('SELECT * FROM incidencias WHERE id = ?', (id,)).fetchone()
+    conn.close()
+    
+    if incidencia is None:
+        return jsonify({'error' : 'Incidencia no hallada'}), 404
+    
+    print(dict(incidencia))
+    return jsonify(dict(incidencia))
+
 
 if __name__ == '__main__':
     app.run(debug=True)
