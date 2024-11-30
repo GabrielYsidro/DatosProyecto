@@ -26,5 +26,5 @@
     <p><strong>Estado:</strong> {incidencia.descripcion}</p>
     <!-- Renderiza más información aquí -->
 {:else}
-    <p>Cargando incidencia...</p>
+    <p>Cargando r...</p>
 {/if}

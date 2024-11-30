@@ -127,6 +127,47 @@ def get_incidencia(id):
     return jsonify(dict(incidencia))
 
 
+@app.route('/api/incidencias', methods=['GET'])
+def obtenerIncidencias():
+    # Obtener parámetros de consulta
+    id_proyecto = request.args.get('id_proyecto', type=int)
+    id_departamento = request.args.get('id_departamento', type=int)
+
+    conn = conectarDB()
+    cursor = conn.cursor()
+
+    try:
+        query = """
+            SELECT i.id, i.resumen, i.descripcion, i.fecha_envio, 
+                   p.nombre AS proyecto, d.nombre AS departamento
+            FROM incidencias i
+            LEFT JOIN proyectos p ON i.id_proyecto = p.id
+            LEFT JOIN departamentos d ON i.id_departamento = d.id
+            WHERE (i.id_proyecto = ? OR ? IS NULL)
+              AND (i.id_departamento = ? OR ? IS NULL)
+        """
+        params = (id_proyecto, id_proyecto, id_departamento, id_departamento)
+        incidencias = cursor.execute(query, params).fetchall()
+
+        resultado = [
+            {
+                "id": row["id"],
+                "resumen": row["resumen"],
+                "descripcion": row["descripcion"],
+                "fecha_envio": row["fecha_envio"],
+                "proyecto": row["proyecto"],
+                "departamento": row["departamento"],
+            }
+            for row in incidencias
+        ]
+    except sqlite3.Error as e:
+        conn.close()
+        return jsonify({"error": str(e)}), 400
+    conn.close()
+    return jsonify(resultado)
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)
 
