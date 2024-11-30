@@ -1,7 +1,4 @@
 
-
-
-
 <!-- Aqui se definen los estados y la funcion de envio de datos a la API -->
 <script>
     import { writable } from 'svelte/store';
@@ -9,15 +6,17 @@
     import CargaArchivo from '../../componentes/CargaArchivo.svelte';
     import {fetchRecurso} from '../../servicios/buscarRecurso'
     import {onMount} from 'svelte'
+    import {uploadFile} from '../../servicios/subirArchivo'
 
+    const proyectos = writable([])
+    let selectedResource = writable({id: 0, nombre: ''});
+    let selectedProyectoName = '';
+    let selectedFile = null;
 
-    let proyectos = []
-    let selectedResource = ''
-
-    
     onMount(async () => {
-        proyectos = await fetchRecurso("proyectos");
-        console.log(proyectos)
+        const response = await fetchRecurso("proyectos");
+        proyectos.set(response)
+        console.log($proyectos)
     });
     // Definir el esquema de validación usando Zod
     const formSchema = z.object({
@@ -27,6 +26,7 @@
     resumen: z.string().min(1, "El resumen es requerido").max(50, "El resumen debe tener menos de 50 caracteres"),
     descripcion: z.string().min(1, "La descripción es requerida").max(500, "La descripción debe tener menos de 500 caracteres"),
     ruc: z.string().min(10,"Minimo 11 digitos").max("Maximo 11 digitos").regex(/^\d+$/, "Solo numeros")});
+    proyecto: z.string().min(1, "El proyecto es requerido")
     // Estado para el formulario
     let formData = writable({
     name: '',
@@ -36,7 +36,14 @@
     resumen: '',
     descripcion: '',
     ruc: '',
-    proyecto : selectedResource
+    proyecto : ''
+    });
+
+    selectedResource.subscribe(value => {
+        formData.update(data => {
+            data.proyecto = value ? value.id : 0;
+            return data;
+        });
     });
 
     let formErrors = writable({});
@@ -57,17 +64,55 @@
         return acc;
         }, {}));
     } else {
-        // Aquí iría el código para enviar los datos si la validación es exitosa
         console.log("Formulario válido:", $formData);
+
+        if (selectedFile) {
+                try {
+                    const result = await uploadFile(selectedFile);
+                    if (result.success) {
+                        formData.update(data => {
+                            data.uploadedFileUrl = result.file_url;
+                            return data;
+                        });
+                    } else {
+                        console.error(result.message || 'Error desconocido');
+                    }
+                } catch (error) {
+                    console.error('Error al cargar el archivo:', error);
+                }
+            }
+
+        const response = await fetch("http://localhost:5000/clienteDB", {
+            method : "POST",
+            headers: {
+                    "Content-Type": "application/json"
+                },
+            body : JSON.stringify($formData)
+        });
+
+        if(!response.ok) {
+
+        }
+
     }
 
     isSubmitting.set(false);
     };
 
     function handleChange(event) {
-        selectedResource = event.target.value;
-        console.log('Recurso seleccionado:', selectedResource);
+        selectedProyectoName = event.target.value;
+        console.log(selectedProyectoName)
+        const selectedProject = $proyectos.find(proyecto => proyecto.nombre === selectedProyectoName);
+        console.log(selectedProject)
+        selectedResource.set(selectedProject || { id: 0, nombre: '' });
+        console.log("RECURSO: ", $selectedResource)
     }
+
+    function handleFileChange(event) {
+        selectedFile = event.target.files[0];
+        console.log('Archivo seleccionado:', selectedFile);
+    }
+    
 </script>
 
 
@@ -163,11 +208,11 @@
         </div>
     
         <div> 
-            <label for="proyectos"> Seleccione el producto sobre el que tiene una consulta: </label><br>
-            <select id="proyectos" autocomplete="on" bind:value={selectedResource} on:change={handleChange}>
+            <label for="proyectos"> Seleccione el proyecto sobre el que tiene una consulta: </label><br>
+            <select id="proyectos" autocomplete="on" value={selectedProyectoName} on:change={handleChange}>
                 <option value="" disabled>Selecciona un recurso</option>
-                {#each proyectos as resource}
-                    <option value={resource.nombre}>{resource.nombre}</option>
+                {#each $proyectos as proyecto}
+                    <option value={proyecto.nombre}>{proyecto.nombre}</option>
                 {/each}
             </select>
         </div>
@@ -188,7 +233,15 @@
             {/if}
         </div>
         
-        <CargaArchivo bind:uploadedFileUrl={$formData.uploadedFileUrl} />
+        <div>
+            <label for="file">Seleccionar archivo:</label><br>
+            <input id="file" type="file" on:change={handleFileChange} /><br>
+            {#if $formData.uploadedFileUrl}
+                <p>Archivo subido correctamente. Visualizar 
+                    <a href={$formData.uploadedFileUrl} target="_blank">aquí</a>
+                </p>
+            {/if}
+        </div>
     
         <button class="envio" type="submit" disabled={$isSubmitting}>Enviar</button>
     </form>

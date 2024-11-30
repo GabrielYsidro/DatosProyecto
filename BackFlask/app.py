@@ -67,3 +67,51 @@ def obtenerRecurso(recurso):
     conn.close()
     return jsonify(resultado)
 
+@app.route('/clienteDB', methods=['POST'])
+def clienteDB():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No se enviaron datos"}), 400
+    
+    print("Datos recibidos:", data)
+    
+    conn = conectarDB()
+    cursor = conn.cursor()
+    
+    name = data.get('name')
+    email = data.get('email')
+    contra = data.get('password')
+    
+    summary = data.get('resumen')
+    desc = data.get('descripcion')
+    id_pro = data.get('proyecto')
+    doc = data.get('uploadedFileUrl')
+    ruc = data.get('ruc')
+    
+    response = ""
+    
+    try:
+        
+        #Crear usuario y usuario_cliente
+        cursor.execute("INSERT INTO usuarios (nombre, correo, contrasenha) VALUES (?, ?, ?)", (name,email,contra))
+        last_id = cursor.lastrowid
+        cursor.execute("INSERT INTO usuarios_cliente (ruc, id_usuario) VALUES (?, ?)", (ruc, last_id))
+        
+        #Crear documento
+        cursor.execute("INSERT INTO documentos (url_doc) VALUES (?)", (doc,))
+        last_id = cursor.lastrowid
+        
+        #Crear incidencia
+        cursor.execute("INSERT INTO incidencias (resumen, descripcion, fecha_envio, id_proyecto, id_documento) VALUES (?, ?, DATETIME('now'), ?, ?)", (summary, desc, id_pro,last_id))
+        conn.commit()
+        response = {"message": "Data inserted successfully"}
+        print("PASE")
+        
+    except sqlite3.Error as e:
+        conn.rollback()
+        print(str(e))
+        print("ERROR")
+    finally:
+        conn.close()
+    
+    return jsonify(response)
