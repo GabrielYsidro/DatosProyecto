@@ -2,6 +2,7 @@ from faker import Faker
 from datetime import datetime, timedelta
 import random
 import string
+import sqlite3
 
 fake = Faker()
 
