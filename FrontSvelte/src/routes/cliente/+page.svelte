@@ -3,7 +3,6 @@
 <script>
     import { writable } from 'svelte/store';
     import { z } from 'zod';
-    import CargaArchivo from '../../componentes/CargaArchivo.svelte';
     import {fetchRecurso} from '../../servicios/buscarRecurso'
     import {onMount} from 'svelte'
     import {uploadFile} from '../../servicios/subirArchivo'
