@@ -1,11 +1,22 @@
 <script>
   import { onMount } from 'svelte';
+   import { onMount } from 'svelte';
 
   let projects = [];
   let departments = [];
   let incidents = [];
   let selectedProject = "";
   let selectedDepartment = "";
+    let projects = [];
+    let departments = [];
+    let selectedProject = "";
+    let selectedDepartment = "";
+
+    // Función genérica para obtener datos
+    async function fetchData(resource) {
+    const response = await fetch(`http://localhost:5000/api/${resource}`);
+    return await response.json();
+    }
 
   // Función para obtener recursos desde la API
   async function fetchRecurso(recurso) {
@@ -88,6 +99,76 @@
   {/if}
 </div>
 
+    // Llamar a la API para obtener proyectos y departamentos
+    onMount(async () => {
+    projects = await fetchData('proyectos');
+    departments = await fetchData('departamentos');
+    });
+  
+    // Filtra las incidencias según los valores seleccionados
+    $: filteredIncidents = incidents.filter(incident => {
+      return (
+        (selectedProject ? incident.project === selectedProject : true) &&
+        (selectedDepartment ? incident.department === selectedDepartment : true)
+      );
+    });
+  
+    // Función para obtener el color del estado
+    function getStatusColor(status) {
+      switch (status) {
+        case 'Abierto': return '#e57e7e';
+        case 'En progreso': return '#f1c40f';
+        case 'Cerrado': return '#81c784';
+        default: return '#c3c3c3';
+      }
+    }
+  </script>
+  
+  <div class="filter-container">
+    <div>
+      <label for="project-select">Proyecto:</label>
+      <select id="project-select" bind:value={selectedProject}>
+        <option value="">Todos</option>
+        {#each projects as project}
+          <option value={project.id}>{project.nombre}</option>
+        {/each}
+      </select>
+    </div>
+  
+    <div>
+      <label for="department-select">Departamento:</label>
+      <select id="department-select" bind:value={selectedDepartment}>
+        <option value="">Todos</option>
+        {#each departments as department}
+          <option value={department.id}>{department.nombre}</option>
+        {/each}
+      </select>
+    </div>
+  </div>
+  
+  <div class="incident-table">
+    <h2>Incidencias</h2>
+    {#if filteredIncidents.length > 0}
+      <div class="incident-list">
+        {#each filteredIncidents as incident}
+          <div class="incident-row">
+            <div class="id-section">
+              <span class="status-indicator" style="background-color: {getStatusColor(incident.status)};"></span>
+              <span class="incident-id">{incident.id}</span>
+            </div>
+            <div class="details-section">
+              <span class="title">{incident.title}</span>
+              <span class="project">Proyecto: {incident.project}</span>
+              <span class="department">Departamento: {incident.department}</span>
+              <span class="date">{incident.date}</span>
+            </div>
+          </div>
+        {/each}
+      </div>
+    {:else}
+      <p>No se encontraron incidencias para los filtros seleccionados.</p>
+    {/if}
+  </div>
   
   <style>
     .filter-container {
