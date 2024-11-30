@@ -4,3 +4,23 @@ prioridad >
 departamentos >
 documentos vacio
 estados >
+
+
+TENER CUIDADO CON LAS ASOCIATIVAS
+Generar correctamente segun el tipo de documentos
+
+incidencias y comentarios:
+Validar que el campo @tipo@ en documento sea "incidencia". Si es asi, lo pones en id_docmento de incidencia
+
+Los usuarios de cada tipo deben emparejarse con un usuario unico.
+Ejemplo -> Usuario 8 es cliente, id_usuario 8 NO PUEDE ESTAR En usuarios_developer
+Usuario 3 es developer, id_usuario 3 NO PUEDE estar en usuarios_analista
+
+GENERAR 300 usuarios
+
+pares -> devs
+impares -> clientes
+100,200,300 -> analistas
+
+documentos_comentario -> hacer la misma validacion que para incidencias y comentarios
+

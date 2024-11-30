@@ -1,3 +1,5 @@
+
+--migrate:up
 INSERT INTO usuarios (id, nombre, url_imagen, correo, contasenha) VALUES (1, 'Kailey', 'http://dummyimage.com/147x100.png/dddddd/000000', 'kautry0@telegraph.co.uk', 'P7mZ2gLx3aVq49F');
 INSERT INTO usuarios (id, nombre, url_imagen, correo, contasenha) VALUES (2, 'Flossy', 'http://dummyimage.com/100x100.png/ff4444/ffffff', 'fmcgowan1@kickstarter.com', 'XmL72Qd8nTYp36K');
 INSERT INTO usuarios (id, nombre, url_imagen, correo, contasenha) VALUES (3, 'Penelopa', 'http://dummyimage.com/134x100.png/dddddd/000000', 'pcrayker2@youtu.be', 'Zp4nXw37MvL82gJ');
