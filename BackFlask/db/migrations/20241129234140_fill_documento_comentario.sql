@@ -10,5 +10,5 @@ INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (15, 8);
 INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (17, 9);
 INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (19, 10);
 -- migrate:down
--- Borrar la tabla 'documento_comentarios'
+
 DROP TABLE documento_comentarios;
