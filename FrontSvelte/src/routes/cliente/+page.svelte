@@ -9,7 +9,7 @@
 
 
     let proyectos = []
-    let selectedResource = writable('');
+    let selectedResource = writable({id: '', nombre: ''});
 
 
     onMount(async () => {
@@ -24,6 +24,7 @@
     resumen: z.string().min(1, "El resumen es requerido").max(50, "El resumen debe tener menos de 50 caracteres"),
     descripcion: z.string().min(1, "La descripción es requerida").max(500, "La descripción debe tener menos de 500 caracteres"),
     ruc: z.string().min(10,"Minimo 11 digitos").max("Maximo 11 digitos").regex(/^\d+$/, "Solo numeros")});
+    proyecto: z.string().min(1, "El proyecto es requerido")
     // Estado para el formulario
     let formData = writable({
     name: '',
@@ -38,7 +39,7 @@
 
     selectedResource.subscribe(value => {
         formData.update(data => {
-            data.proyecto = value;
+            data.proyecto = value ? value.id : '';
             return data;
         });
     });
@@ -80,8 +81,10 @@
     };
 
     function handleChange(event) {
-        selectedResource.set(event.target.value)
-        console.log('Recurso seleccionado:', event.target.value);
+        const selectedId = event.target.value
+        const selected = proyectos.find(resource => resource.id === parseInt(selectedId))
+        selectedResource.set(selected)
+        console.log("RECURSO: ", selected)
     }
 </script>
 
@@ -179,10 +182,10 @@
     
         <div> 
             <label for="proyectos"> Seleccione el proyecto sobre el que tiene una consulta: </label><br>
-            <select id="proyectos" autocomplete="on" bind:value={$selectedResource} on:change={handleChange}>
+            <select id="proyectos" autocomplete="on" bind:value={$selectedResource.id} on:change={handleChange}>
                 <option value="" disabled>Selecciona un recurso</option>
                 {#each proyectos as resource}
-                    <option value={resource.nombre}>{resource.nombre}</option>
+                    <option value={resource.id}>{resource.nombre}</option>
                 {/each}
             </select>
         </div>
