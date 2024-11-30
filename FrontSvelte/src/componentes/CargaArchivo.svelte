@@ -5,7 +5,7 @@
     export let uploadedFileUrl = '';
     let errorMessage = '';
     //Se envian los datos al server en Flask
-    const tratarCarga = async () => {
+    export const tratarCarga = async () => {
         if (!file) {
             return alert("Por favor, seleccione un archivo");
         }
@@ -21,7 +21,7 @@
             console.error('Error al cargar el archivo:', error);
         }
     }
-    const tratarCambios = (e) => {
+    const tratarCambios = async (e) => {
             file = e.target.files[0];
             errorMessage = '';
         }
@@ -44,7 +44,6 @@
 <div class="carga">
     <label for="file">Seleccionar archivo: </label>
     <input type="file" id="file" on:change={tratarCambios} /><br>
-    <button on:click={tratarCarga}>Subir archivo</button>
     {#if uploadedFileUrl}
     <p>Archivo subido correctamente. Visualizar 
         <a href = {uploadedFileUrl} target="_blank">aquí</a>

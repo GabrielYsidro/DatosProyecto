@@ -36,3 +36,9 @@ las incidencias que se le han asignado a su departamento
 -Debiles: Modificar el estado de la incidencia, asignar developers a incidencia
 
 -Asociativas: Filtros 
+
+
+
+BASE DE DATOS:
+
+-RUC: Empieza con 10 y termina con un numero aleatorio de 0 a 9 (siempre son 11 digitos)

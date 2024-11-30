@@ -6,15 +6,17 @@
     import CargaArchivo from '../../componentes/CargaArchivo.svelte';
     import {fetchRecurso} from '../../servicios/buscarRecurso'
     import {onMount} from 'svelte'
+    import {uploadFile} from '../../servicios/subirArchivo'
 
-
-    let proyectos = []
-    let selectedResource = writable({id: '', nombre: ''});
-
+    const proyectos = writable([])
+    let selectedResource = writable({id: 0, nombre: ''});
+    let selectedProyectoName = '';
+    let selectedFile = null;
 
     onMount(async () => {
-        proyectos = await fetchRecurso("proyectos");
-        console.log(proyectos)
+        const response = await fetchRecurso("proyectos");
+        proyectos.set(response)
+        console.log($proyectos)
     });
     // Definir el esquema de validación usando Zod
     const formSchema = z.object({
@@ -39,7 +41,7 @@
 
     selectedResource.subscribe(value => {
         formData.update(data => {
-            data.proyecto = value ? value.id : '';
+            data.proyecto = value ? value.id : 0;
             return data;
         });
     });
@@ -63,6 +65,23 @@
         }, {}));
     } else {
         console.log("Formulario válido:", $formData);
+
+        if (selectedFile) {
+                try {
+                    const result = await uploadFile(selectedFile);
+                    if (result.success) {
+                        formData.update(data => {
+                            data.uploadedFileUrl = result.file_url;
+                            return data;
+                        });
+                    } else {
+                        console.error(result.message || 'Error desconocido');
+                    }
+                } catch (error) {
+                    console.error('Error al cargar el archivo:', error);
+                }
+            }
+
         const response = await fetch("http://localhost:5000/clienteDB", {
             method : "POST",
             headers: {
@@ -81,11 +100,19 @@
     };
 
     function handleChange(event) {
-        const selectedId = event.target.value
-        const selected = proyectos.find(resource => resource.id === parseInt(selectedId))
-        selectedResource.set(selected)
-        console.log("RECURSO: ", selected)
+        selectedProyectoName = event.target.value;
+        console.log(selectedProyectoName)
+        const selectedProject = $proyectos.find(proyecto => proyecto.nombre === selectedProyectoName);
+        console.log(selectedProject)
+        selectedResource.set(selectedProject || { id: 0, nombre: '' });
+        console.log("RECURSO: ", $selectedResource)
     }
+
+    function handleFileChange(event) {
+        selectedFile = event.target.files[0];
+        console.log('Archivo seleccionado:', selectedFile);
+    }
+    
 </script>
 
 
@@ -182,10 +209,10 @@
     
         <div> 
             <label for="proyectos"> Seleccione el proyecto sobre el que tiene una consulta: </label><br>
-            <select id="proyectos" autocomplete="on" bind:value={$selectedResource.id} on:change={handleChange}>
+            <select id="proyectos" autocomplete="on" value={selectedProyectoName} on:change={handleChange}>
                 <option value="" disabled>Selecciona un recurso</option>
-                {#each proyectos as resource}
-                    <option value={resource.id}>{resource.nombre}</option>
+                {#each $proyectos as proyecto}
+                    <option value={proyecto.nombre}>{proyecto.nombre}</option>
                 {/each}
             </select>
         </div>
@@ -206,7 +233,15 @@
             {/if}
         </div>
         
-        <CargaArchivo bind:uploadedFileUrl={$formData.uploadedFileUrl} />
+        <div>
+            <label for="file">Seleccionar archivo:</label><br>
+            <input id="file" type="file" on:change={handleFileChange} /><br>
+            {#if $formData.uploadedFileUrl}
+                <p>Archivo subido correctamente. Visualizar 
+                    <a href={$formData.uploadedFileUrl} target="_blank">aquí</a>
+                </p>
+            {/if}
+        </div>
     
         <button class="envio" type="submit" disabled={$isSubmitting}>Enviar</button>
     </form>

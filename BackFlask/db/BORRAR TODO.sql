@@ -10,12 +10,12 @@ DELETE FROM documento_comentarios;
 DELETE FROM developer_departamentos;
 DELETE FROM departamentos;
 DELETE FROM departamentos_proyecto;
-DELETE FROM documentos;
-DELETE FROM estados;
-DELETE FROM etiquetas;
+DELETE FROM usuarios;
 DELETE FROM incidencias;
 DELETE FROM prioridades;
 DELETE FROM proyectos;
-DELETE FROM usuarios;
+DELETE FROM documentos;
+DELETE FROM estados;
+DELETE FROM etiquetas;
 
-INSERT INTO proyectos (nombre, fecha_inicio) VALUES ('Desarrollo de Software', DATE('now'));
+VACUUM
