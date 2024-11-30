@@ -14,14 +14,14 @@
 
   const timelineEvents = [
   {
-    userImage: "ruta_a_la_imagen1.jpg",
+    userImage: '',
     userName: "dregad",
     action: "realizó un comentario en la incidencia",
     issueId: "0034928",
     date: "2024-11-10 11:58",
   },
   {
-    userImage: "ruta_a_la_imagen2.jpg",
+    userImage: '',
     userName: "atrol",
     action: "se asignó la incidencia",
     issueId: "0008355",

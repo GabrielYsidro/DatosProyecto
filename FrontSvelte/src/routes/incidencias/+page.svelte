@@ -1,17 +1,22 @@
 <script>
-    let projects = ["Proyecto A", "Proyecto B", "Proyecto C"];
-    let departments = ["Departamento X", "Departamento Y", "Departamento Z"];
+   import { onMount } from 'svelte';
+
+    let projects = [];
+    let departments = [];
     let selectedProject = "";
     let selectedDepartment = "";
-    
-    // Datos de ejemplo
-    let incidents = [
-      { id: '001', project: "Proyecto A", department: "Departamento X", title: 'Error en API', date: '2024-11-12', status: 'Abierto' },
-      { id: '002', project: "Proyecto B", department: "Departamento Y", title: 'Falla en servidor', date: '2024-11-14', status: 'En progreso' },
-      { id: '003', project: "Proyecto C", department: "Departamento Z", title: 'Configuración incorrecta', date: '2024-11-15', status: 'Cerrado' },
-      { id: '004', project: "Proyecto A", department: "Departamento Y", title: 'Problema de acceso', date: '2024-11-16', status: 'Abierto' },
-      { id: '005', project: "Proyecto B", department: "Departamento X", title: 'Actualización requerida', date: '2024-11-17', status: 'En progreso' }
-    ];
+
+    // Función genérica para obtener datos
+    async function fetchData(resource) {
+    const response = await fetch(`http://localhost:5000/api/${resource}`);
+    return await response.json();
+    }
+
+    // Llamar a la API para obtener proyectos y departamentos
+    onMount(async () => {
+    projects = await fetchData('proyectos');
+    departments = await fetchData('departamentos');
+    });
   
     // Filtra las incidencias según los valores seleccionados
     $: filteredIncidents = incidents.filter(incident => {
@@ -38,7 +43,7 @@
       <select id="project-select" bind:value={selectedProject}>
         <option value="">Todos</option>
         {#each projects as project}
-          <option value={project}>{project}</option>
+          <option value={project.id}>{project.nombre}</option>
         {/each}
       </select>
     </div>
@@ -48,7 +53,7 @@
       <select id="department-select" bind:value={selectedDepartment}>
         <option value="">Todos</option>
         {#each departments as department}
-          <option value={department}>{department}</option>
+          <option value={department.id}>{department.nombre}</option>
         {/each}
       </select>
     </div>
