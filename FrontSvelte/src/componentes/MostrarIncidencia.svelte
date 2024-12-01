@@ -1,25 +1,41 @@
-
 <script>
     import { onMount } from 'svelte';
-    import { page } from '$app/stores'; // Para acceder a los parámetros de la URL
-
-    let id;
-    let incidencia = '';
-
-    // Obtener el ID de la URL
-    $: id = $page.params.id;
-
-    // Cargar la información de la incidencia (puedes usar fetch o Axios)
+  
+    export let params;
+    console.log("Params en MostrarIncidencia:", params); // Depuración
+    let id = params?.incidenciaid || null;
+    let incidencia = null;
+  
     onMount(async () => {
-        const response = await fetch(`http://localhost:5000/api/incidencias/1`); // Endpoint de tu API
+      if (!id) {
+        console.error("ID no definido");
+        return;
+      }
+  
+      try {
+        const response = await fetch(`http://localhost:5000/api/incidencias/${id}`);
         if (response.ok) {
-            incidencia = await response.json();
+          incidencia = await response.json();
         } else {
-            console.error("Error al obtener la incidencia");
+          console.error("Error al obtener la incidencia");
         }
+      } catch (error) {
+        console.error("Error en la conexión:", error);
+      }
     });
-</script>
-
+  </script>
+  
+  
+  {#if incidencia}
+    <div>
+      <h1>{incidencia.titulo}</h1>
+      <p>{incidencia.descripcion}</p>
+    </div>
+  {:else}
+    <p>Cargando incidencia...</p>
+  {/if}
+  
+  
 <style>
     table {
         width: 100%;

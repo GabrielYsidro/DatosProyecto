@@ -75,7 +75,7 @@
             <span class="incident-id">{incident.id}</span>
           </div>
           <div class="details-section">
-            <a href="/incidencias/{incident.id}"><span class="title">{incident.resumen}</span></a>
+            <a href="/incidencias/{incident.id}">{incident.resumen}</a>
             <span class="project">Proyecto: {incident.proyecto}</span>
             <span class="department">Departamento: {incident.departamento}</span>
             <span class="date">{incident.fecha_envio}</span>
