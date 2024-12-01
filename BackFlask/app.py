@@ -54,9 +54,11 @@ def obtenerRecurso(recurso):
     conn = conectarDB()
     cursor = conn.cursor()
     try:
-        recursos = cursor.execute(f"SELECT id, nombre FROM {recurso}").fetchall()
+        recursos = cursor.execute(f"SELECT * FROM {recurso}").fetchall()
+        #Obener los nombres de las columnas
+        column_names = [description[0] for description in cursor.description]
         # Convertir el resultado en una lista de diccionarios
-        resultado = [{"id" : row["id"], "nombre": row["nombre"]} for row in recursos]
+        resultado = [dict(zip(column_names, row)) for row in recursos]
         print(resultado)  # Verificar el contenido
     except sqlite3.Error as e:
         conn.close()

@@ -34,7 +34,7 @@
       // Validar datos en el servidor
       try {
           const usuarios = await fetchRecurso('usuarios'); // Usamos fetchRecurso para cargar usuarios
-
+          console.log(usuarios)
           // Buscar si el usuario existe y validar credenciales
           const user = usuarios.find(
               u =>
@@ -49,11 +49,11 @@
               // Determinar rol desde las tablas hijas
               let role = null;
 
-              if ((await fetchRecurso('usuario_cliente')).some(c => c.user_id === user.id)) {
+              if ((await fetchRecurso('usuarios_cliente')).some(c => c.id_usuario === user.id)) {
                   role = 'cliente';
-              } else if ((await fetchRecurso('usuario_analista')).some(a => a.user_id === user.id)) {
+              } else if ((await fetchRecurso('usuarios_analista')).some(a => a.id_usuario === user.id)) {
                   role = 'analista';
-              } else if ((await fetchRecurso('usuario_developer')).some(d => d.user_id === user.id)) {
+              } else if ((await fetchRecurso('usuarios_developer')).some(d => d.id_usuario === user.id)) {
                   role = 'developer';
               }
 
