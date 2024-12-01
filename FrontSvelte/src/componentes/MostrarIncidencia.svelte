@@ -1,40 +1,173 @@
 <script>
-    import { onMount } from 'svelte';
-  
+    import { onMount } from "svelte";
+
     export let params;
-    console.log("Params en MostrarIncidencia:", params); // Depuración
     let id = params?.incidenciaid || null;
     let incidencia = null;
-  
-    onMount(async () => {
-      if (!id) {
-        console.error("ID no definido");
-        return;
-      }
-  
-      try {
-        const response = await fetch(`http://localhost:5000/api/incidencias/${id}`);
+    let proyectos = [];
+    let departamentos = [];
+    let estados = [];
+    let prioridades = [];
+    let etiquetas = [];
+    let etiquetasSeleccionadas = [];
+
+    let loading = false;
+
+    const fetchData = async (url) => {
+        const response = await fetch(url);
         if (response.ok) {
-          incidencia = await response.json();
+            return await response.json();
         } else {
-          console.error("Error al obtener la incidencia");
+            console.error(`Error al obtener datos de ${url}`);
+            return [];
         }
-      } catch (error) {
-        console.error("Error en la conexión:", error);
-      }
+    };
+
+    onMount(async () => {
+        if (!id) {
+            console.error("ID no definido");
+            return;
+        }
+
+        try {
+            const urls = [
+                `http://localhost:5000/api/incidencias/${id}`,
+                "http://localhost:5000/api/proyectos",
+                "http://localhost:5000/api/departamentos",
+                "http://localhost:5000/api/estados",
+                "http://localhost:5000/api/prioridades",
+                "http://localhost:5000/api/etiquetas"
+            ];
+            const [incidenciaData, proyectosData, departamentosData, estadosData, prioridadesData, etiquetasData] =
+                await Promise.all(urls.map(fetchData));
+
+            incidencia = incidenciaData || {}; // Asegúrate de que no sea null/undefined
+            proyectos = proyectosData;
+            departamentos = departamentosData;
+            estados = estadosData;
+            prioridades = prioridadesData;
+            etiquetas = etiquetasData;
+
+            // Inicializa etiquetasSeleccionadas con los IDs correspondientes
+            etiquetasSeleccionadas = (incidencia.tags || []).map(tag =>
+                etiquetas.find(e => e.nombre === tag)?.id
+            ).filter(Boolean);
+        } catch (error) {
+            console.error("Error al cargar datos:", error);
+        }
     });
-  </script>
+
+    const actualizarIncidencia = async () => {
+        try {
+            const body = {
+                id_proyecto: incidencia.id_proyecto,
+                id_departamento: incidencia.id_departamento,
+                id_estado: incidencia.id_estado,
+                id_prioridad: incidencia.id_prioridad,
+                tags: etiquetasSeleccionadas,
+            };
+
+            const respuesta = await fetch(`http://localhost:5000/api/incidencias/${id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body),
+            });
+
+            if (!respuesta.ok) {
+                throw new Error(`Error: ${respuesta.status}`);
+            }
+
+            alert("Incidencia actualizada correctamente.");
+        } catch (error) {
+            console.error("Error al actualizar la incidencia:", error);
+            alert("Error al actualizar la incidencia.");
+        }
+    };
+
+    // Función para manejar la selección de etiquetas
+    const toggleEtiqueta = (idEtiqueta) => {
+        if (etiquetasSeleccionadas.includes(idEtiqueta)) {
+            etiquetasSeleccionadas = etiquetasSeleccionadas.filter(id => id !== idEtiqueta);
+        } else {
+            etiquetasSeleccionadas = [...etiquetasSeleccionadas, idEtiqueta];
+        }
+    };
+</script>
   
   
-  {#if incidencia}
+{#if incidencia}
     <div>
-      <h1>{incidencia.titulo}</h1>
-      <p>{incidencia.descripcion}</p>
+        <h1>Editar Incidencia</h1>
+        <h2>{incidencia.resumen}</h2>
+        <p>{incidencia.descripcion}</p>
+
+        <table>
+            <tbody>
+                <tr>
+                    <th>Proyecto</th>
+                    <td>
+                        <select bind:value={incidencia.id_proyecto}>
+                            {#each proyectos as proyecto}
+                                <option value={proyecto.id}>{proyecto.nombre}</option>
+                            {/each}
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Departamento</th>
+                    <td>
+                        <select bind:value={incidencia.id_departamento}>
+                            {#each departamentos as depto}
+                                <option value={depto.id}>{depto.nombre}</option>
+                            {/each}
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Estado</th>
+                    <td>
+                        <select bind:value={incidencia.id_estado}>
+                            {#each estados as estado}
+                                <option value={estado.id}>{estado.nombre}</option>
+                            {/each}
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Prioridad</th>
+                    <td>
+                        <select bind:value={incidencia.id_prioridad}>
+                            {#each prioridades as prioridad}
+                                <option value={prioridad.id}>{prioridad.nombre}</option>
+                            {/each}
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Etiquetas</th>
+                    <td>
+                        <div>
+                            {#each etiquetas as etiqueta}
+                                <label>
+                                    <input
+                                        type="checkbox"
+                                        value={etiqueta.id}
+                                        on:change={() => toggleEtiqueta(etiqueta.id)}
+                                        checked={etiquetasSeleccionadas.includes(etiqueta.id)}
+                                    />
+                                    {etiqueta.nombre}
+                                </label>
+                            {/each}
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <button on:click={actualizarIncidencia}>Actualizar</button>
     </div>
-  {:else}
+{:else}
     <p>Cargando incidencia...</p>
-  {/if}
-  
+{/if}
   
 <style>
     table {
@@ -63,62 +196,4 @@
         background-color: #e9f1f7;
     }
 
-    .loading {
-        font-size: 1.2em;
-        color: #888;
-        text-align: center;
-        margin-top: 20px;
-    }
 </style>
-
-{#if incidencia}
-    <table>
-        <tbody>
-            <tr>
-                <th>ID</th>
-                <td>{incidencia.id}</td>
-            </tr>
-            <tr>
-                <th>Resumen</th>
-                <td>{incidencia.resumen}</td>
-            </tr>
-            <tr>
-                <th>Descripción</th>
-                <td>{incidencia.descripcion}</td>
-            </tr>
-            <tr>
-                <th>Fecha de Envío</th>
-                <td>{incidencia.fecha_envio}</td>
-            </tr>
-            <tr>
-                <th>Fecha de Actualización</th>
-                <td>{incidencia.fecha_actu}</td>
-            </tr>
-            <tr>
-                <th>ID del Proyecto</th>
-                <td>{incidencia.id_proyecto}</td>
-            </tr>
-            <tr>
-                <th>ID del Departamento</th>
-                <td>{incidencia.id_departamento}</td>
-            </tr>
-            <tr>
-                <th>ID del Estado</th>
-                <td>{incidencia.id_estado}</td>
-            </tr>
-            <tr>
-                <th>ID de la Prioridad</th>
-                <td>{incidencia.id_prioridad}</td>
-            </tr>
-            <tr>
-                <th>ID del Documento</th>
-                <td>{incidencia.id_documento}</td>
-            </tr>
-        </tbody>
-    </table>
-{:else}
-<div class="loading">
-    <p>Cargando incidencia...</p>
-</div>
-    
-{/if}

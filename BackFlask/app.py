@@ -7,7 +7,14 @@ from flask_cors import CORS
 from datetime import datetime
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}})
+
+CORS(app, resources={
+    r"/*": {
+        "origins": "http://localhost:5173",
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }
+})
 
 FOLDER_SUBIDA = 'subidas'
 app.config['FOLDER_SUBIDA'] = FOLDER_SUBIDA
@@ -160,6 +167,95 @@ def obtenerIncidencias():
     conn.close()
     return jsonify(resultado)
 
+@app.route('/api/incidencias/<int:id>', methods=['GET', 'PUT'])
+def incidencia_detalle(id):
+    conn = conectarDB()
+    cursor = conn.cursor()
+
+    if request.method == 'GET':
+        incidencia = cursor.execute(""" 
+            SELECT i.*, GROUP_CONCAT(e.nombre, ', ') AS tags
+            FROM incidencias i
+            LEFT JOIN etiquetas_incidencias ei ON i.id = ei.id_incidencia
+            LEFT JOIN etiquetas e ON ei.id_etiqueta = e.id
+            WHERE i.id = ?
+            GROUP BY i.id
+        """, (id,)).fetchone()
+
+        if incidencia is None:
+            return jsonify({'error': 'Incidencia no encontrada'}), 404
+
+        resultado = dict(incidencia)
+        resultado['tags'] = [t.strip() for t in (resultado['tags'] or '').split(',')]
+        return jsonify(resultado)
+
+    elif request.method == 'PUT':
+        data = request.get_json()
+
+        # Actualizar incidencia
+        keys = ["id_proyecto", "id_departamento", "id_estado", "id_prioridad"]
+        valores = {key: data.get(key) for key in keys if key in data}
+        set_clause = ", ".join([f"{key} = ?" for key in valores.keys()])
+        valores_lista = list(valores.values())
+        valores_lista.append(id)
+
+        try:
+    
+            # Actualizar la incidencia
+            cursor.execute(f"UPDATE incidencias SET {set_clause}, fecha_actu = DATETIME('now') WHERE id = ?", valores_lista)
+           
+            # Actualizar las etiquetas
+            tags = data.get('tags', [])
+            print("Etiquetas recibidas:", tags)  # Verifica que los tags sean los ID correctos
+            
+            
+            # Eliminar las etiquetas antiguas
+            cursor.execute("DELETE FROM etiquetas_incidencias WHERE id_incidencia = ?", (id,))
+            
+            # Insertar las nuevas etiquetas
+            cursor.executemany("INSERT INTO etiquetas_incidencias (id_incidencia, id_etiqueta) VALUES (?, ?)", [(id, tag) for tag in tags])
+            
+            conn.commit()
+        except sqlite3.Error as e:
+            conn.rollback()
+            return jsonify({'error': str(e)}), 400
+        finally:
+            conn.close()
+
+        return jsonify({'message': 'Incidencia actualizada correctamente'}), 200
+
+@app.route('/api/dev/<int:devid>', methods=['GET'])
+def obtener_incidencias_por_desarrollador(devid):
+    conn = conectarDB()
+    cursor = conn.cursor()
+
+    try:
+        query = """
+            SELECT i.id, i.resumen, i.descripcion, i.fecha_envio, i.fecha_actu
+            FROM incidencias i
+            JOIN incidencia_developer id ON i.id = id.id_incidencia
+            WHERE id.id_developer = ?
+        """
+        cursor.execute(query, (devid,))
+        incidencias = cursor.fetchall()
+
+        resultado = [
+            {
+                "id": row[0],
+                "resumen": row[1],
+                "descripcion": row[2],
+                "fecha_envio": row[3],
+                "fecha_actu": row[4]
+            }
+            for row in incidencias
+        ]
+
+    except sqlite3.Error as e:
+        conn.close()
+        return jsonify({"error": str(e)}), 400
+
+    conn.close()
+    return jsonify(resultado)
 
 
 if __name__ == '__main__':

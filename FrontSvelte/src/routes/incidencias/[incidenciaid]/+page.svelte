@@ -1,5 +1,5 @@
 <script>
-  import MostrarIncidencia from "../../../componentes/MostrarIncidencia.svelte";
+  import MostrarIncidencia from '../../../componentes/MostrarIncidencia.svelte';
   import { page } from "$app/stores";
 
   let params;
@@ -11,5 +11,3 @@
 </script>
 
 <MostrarIncidencia {params} />
-
-
