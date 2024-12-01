@@ -58,12 +58,21 @@
               }
 
               if (role) {
-                  // Redirigir según el rol
-                  if (role === 'cliente') goto('/cliente');
-                  else if (role === 'developer') goto(`/dev/${user.id}`);
-                  else if (role === 'analista') goto('/admin');
+                
+                if (role === 'cliente') {
+                    goto('/cliente');
+                } else if (role === 'developer') {
+                    const developer = await fetchRecurso('usuarios_developer');
+                    const dev = developer.find(d => d.id_usuario === user.id);
+
+                    if (dev) {
+                        goto(`/dev/${dev.id}`);
+                    }
+                } else if (role === 'analista') {
+                    goto('/admin');
+                } 
               } else {
-                  formErrors.set({ general: 'Rol no asignado al usuario' });
+                formErrors.set({ general: 'Rol no asignado al usuario' });
               }
           }
       } catch (error) {
