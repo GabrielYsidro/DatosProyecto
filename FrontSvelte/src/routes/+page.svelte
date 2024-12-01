@@ -60,7 +60,7 @@
               if (role) {
                   // Redirigir según el rol
                   if (role === 'cliente') goto('/cliente');
-                  else if (role === 'developer') goto('/dev');
+                  else if (role === 'developer') goto(`/dev/${user.id}`);
                   else if (role === 'analista') goto('/admin');
               } else {
                   formErrors.set({ general: 'Rol no asignado al usuario' });
