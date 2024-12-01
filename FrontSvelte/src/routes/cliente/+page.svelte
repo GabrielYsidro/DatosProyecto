@@ -25,8 +25,9 @@
     password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres").regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/, "La contraseña debe contener al menos una letra mayúscula, una letra minúscula y un número"),
     resumen: z.string().min(1, "El resumen es requerido").max(50, "El resumen debe tener menos de 50 caracteres"),
     descripcion: z.string().min(1, "La descripción es requerida").max(500, "La descripción debe tener menos de 500 caracteres"),
-    ruc: z.string().min(10,"Minimo 11 digitos").max("Maximo 11 digitos").regex(/^\d+$/, "Solo numeros")});
-    proyecto: z.string().min(1, "El proyecto es requerido")
+    ruc: z.string().min(10,"Minimo 11 digitos").max("Maximo 11 digitos").regex(/^\d+$/, "Solo numeros")
+    });
+    
     // Estado para el formulario
     let formData = writable({
     name: '',
@@ -36,7 +37,8 @@
     resumen: '',
     descripcion: '',
     ruc: '',
-    proyecto : ''
+    proyecto : '',
+    tipo: 'incidencia'
     });
 
     selectedResource.subscribe(value => {

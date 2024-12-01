@@ -5,8 +5,8 @@ CREATE TABLE comentarios (
     fecha DATETIME NOT NULL,
     id_analista INTEGER,
     id_developer INTEGER,
-    FOREIGN KEY (id_analista) REFERENCES analistas(id),
-    FOREIGN KEY (id_developer) REFERENCES developers(id)
+    FOREIGN KEY (id_analista) REFERENCES usuarios_analista(id),
+    FOREIGN KEY (id_developer) REFERENCES usuarios_developer(id)
     );
 -- migrate:down
 DROP TABLE comentarios;

@@ -1,341 +1,156 @@
 <script>
-    export let title;
-  
-    // Datos de ejemplo con ID, título, fecha y estado.
-    let incidents = [
-      { id: '0034949', title: 'Max attachment size should scale to larger units in user interface', date: '2024-11-13 07:25', status: 'Abierto' },
-      { id: '0034444', title: 'User group management', date: '2024-11-16 10:00', status: 'En progreso' },
-      { id: '0034578', title: 'API access configuration', date: '2024-11-08 14:19', status: 'Cerrado' },
-      { id: '0034998', title: 'Update HTML purifier', date: '2024-11-05 04:15', status: 'Abierto' },
-      { id: '0034928', title: 'Non-US date format error', date: '2024-11-10 11:58', status: 'En progreso' },
-    ];
+  import { writable } from 'svelte/store';
+  import { goto } from '$app/navigation';
+  import { fetchRecurso } from '../servicios/buscarRecurso.js'; // Importa tu utilidad personalizada
 
-  let isTimelineVisible = true;
+  // Estados del formulario
+  const formData = writable({
+      name: '',
+      email: '',
+      password: ''
+  });
+  const formErrors = writable({});
+  const isSubmitting = writable(false);
 
-  const timelineEvents = [
-  {
-    userImage: "ruta_a_la_imagen1.jpg",
-    userName: "dregad",
-    action: "realizó un comentario en la incidencia",
-    issueId: "0034928",
-    date: "2024-11-10 11:58",
-  },
-  {
-    userImage: "ruta_a_la_imagen2.jpg",
-    userName: "atrol",
-    action: "se asignó la incidencia",
-    issueId: "0008355",
-    date: "2024-11-10 07:43",
-  },
-  // Agrega más eventos según sea necesario
-  ];
+  // Función para manejar el envío del formulario
+  const handleSubmit = async () => {
+      isSubmitting.set(true);
+      formErrors.set({});
 
+      // Validar que los campos no estén vacíos
+      const { name, email, password } = $formData;
+      const errors = {};
 
-    // Controla la visibilidad de la lista de incidentes
-  let isTableVisible = true;
+      if (!name) errors.name = 'El nombre es obligatorio';
+      if (!email) errors.email = 'El correo es obligatorio';
+      if (!password) errors.password = 'La contraseña es obligatoria';
 
- // Cambia la visibilidad de la tabla
-  function toggleTable() {
-    isTableVisible=!isTableVisible;
-  }
-
-  
-    // Función para obtener el color del estado
-    function getStatusColor(status) {
-      switch (status) {
-        case 'Abierto': return '#e57e7e';
-        case 'En progreso': return '#f1c40f';
-        case 'Cerrado': return '#81c784';
-        default: return '#c3c3c3';
+      if (Object.keys(errors).length > 0) {
+          formErrors.set(errors);
+          isSubmitting.set(false);
+          return;
       }
-    }
-  </script>
-  <div class="banner">
-    <div class="banner-left">
-    <h1>Mantis</h1>
-    </div>
-    <div class="banner-right">
-    <span>Anonymus</span>
-    </div>
-  </div>
-  <div class="container">
-    
-    <div class="no-asignadas">
-      <div class="incident-table">
-        <div class="table-header">
-          <h2>Asignaciones</h2>
-          <h2 id="header-counter">{title} <span>1 -5 / {incidents.length}</span></h2>
-          <button>Ver incidencias</button>
-          <button on:click={toggleTable} class="toggle-button">
-            {#if isTableVisible}
-              V <!-- Flecha hacia abajo -->
-            {:else}
-              ^ <!-- Flecha hacia la derecha -->
-            {/if}
-          </button>
 
-        </div>
-        
-        {#if isTableVisible}
-          <div class="incident-list">
-            {#each incidents as incident}
-              <div class="incident-row">
-                <div class="id-section">
-                  <span class="status-indicator" style="background-color: {getStatusColor(incident.status)};"></span>
-                  <span class="incident-id">{incident.id}</span>
-                </div>
-                <div class="details-section">
-                  <span class="title">{incident.title}</span>
-                  <span class="date">{incident.date}</span>
-                </div>
-              </div>
-            {/each}
-          </div>
-        {/if}
-      </div>
-    </div>
-    
-    <div class="timeline">
-      <div class="timeline-header">
-        <h2>Línea de tiempo</h2>
-        <button class="toggle-button" on:click={() => isTimelineVisible = !isTimelineVisible}>
-          {#if isTimelineVisible}
-            ^ <!-- Flecha hacia arriba -->
-          {:else}
-            V <!-- Flecha hacia abajo -->
-          {/if}
-        </button>
-      </div>
-      
-      {#if isTimelineVisible}
-        <div class="timeline-content">
-          {#each timelineEvents as event}
-            <div class="timeline-event">
-              <img src="{event.userImage}" alt="{event.userName}" class="user-avatar" />
-              <div class="event-details">
-                <span class="user-name">{event.userName}</span>
-                <span class="event-action">{event.action}</span>
-                <span class="event-link">{event.issueId}</span>
-                <span class="event-date">{event.date}</span>
-              </div>
-            </div>
-          {/each}
-        </div>
-      {/if}
-    </div>    
-  </div>
+      // Validar datos en el servidor
+      try {
+          const usuarios = await fetchRecurso('usuarios'); // Usamos fetchRecurso para cargar usuarios
 
+          // Buscar si el usuario existe y validar credenciales
+          const user = usuarios.find(
+              u =>
+                  u.nombre === name &&
+                  u.correo === email &&
+                  u.contrasenha === password // Supongo que la contraseña no está cifrada; si lo está, esto cambiaría
+          );
 
-  <style>
+          if (!user) {
+              formErrors.set({ general: 'Credenciales incorrectas' });
+          } else {
+              // Determinar rol desde las tablas hijas
+              let role = null;
 
-    .container {
-      display: flex;
-      flex-wrap: nowrap;
-      gap: 20px;
-      justify-content: space-around;
-      width: 100%;
-      max-width: 1280px;
-    
-    }
-    .banner {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color:#666;
-    color: white;
-    padding: 10px 20px;
-    font-family: Arial, sans-serif;
-    }
+              if ((await fetchRecurso('usuario_cliente')).some(c => c.user_id === user.id)) {
+                  role = 'cliente';
+              } else if ((await fetchRecurso('usuario_analista')).some(a => a.user_id === user.id)) {
+                  role = 'analista';
+              } else if ((await fetchRecurso('usuario_developer')).some(d => d.user_id === user.id)) {
+                  role = 'developer';
+              }
 
-    .banner-left h1 {
-    margin: 0;
-    font-size: 24px;
-    }
+              if (role) {
+                  // Redirigir según el rol
+                  if (role === 'cliente') goto('/cliente');
+                  else if (role === 'developer') goto('/dev');
+                  else if (role === 'analista') goto('/admin');
+              } else {
+                  formErrors.set({ general: 'Rol no asignado al usuario' });
+              }
+          }
+      } catch (error) {
+          console.error('Error al validar el usuario:', error);
+          formErrors.set({ general: 'Error al conectar con el servidor' });
+      }
 
-    .banner-right span {
-    font-size: 18px;
-    }
-    .incident-table {
-    background-color: #d9e9f7;
-    border-radius: 8px;
-    margin: 10px auto;
-    padding: 10px;
-    width: 100%;
-    max-width: 800px; /* Tamaño máximo fijo en pantallas grandes */
-    }
-  
-    .table-header {
-      display: flex;
-      justify-content:space-between;
-      align-items: center;
-      margin-bottom: 10px;
-      background-color: #338fcc;
-      padding: 10px;
-      border-radius: 8px 8px 0 0;
+      isSubmitting.set(false);
+  };
+</script>
+
+<style>
+  .error {
+      color: red;
+      font-size: 0.9em;
+  }
+  form, h1 {
+      margin: auto;
+      width: 60%;
+      text-align: center;
+  }
+  h1 {
+      padding-top: 1em;
+      font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+      padding-bottom: 1em;
+      color: rgb(96, 100, 82);
+      -webkit-text-stroke: 1.5px black;
+  }
+  div {
+      margin-bottom: 2em;
+      font-size: 1.2em;
+  }
+  .principal {
+      background-color: rgb(255, 250, 180);
+      border-radius: 2em;
+      height: 100%;
+      padding: 12em;
+  }
+  input {
+      width: 80%;
+      font-size: 1em;
+      border-radius: 0.4em;
+      padding: 0.5em;
+      border: 1px solid #ccc;
+  }
+  .envio {
+      background-color: rgb(96, 100, 82);
       color: white;
-    }
-  
-    .table-header h2 {
-      font-size: 18px;
-      margin: 0;
-    }
-
-   
-    .table-header span {
-      background-color: #a1b5c6;
-      padding: 3px 6px;
-      border-radius: 12px;
-      font-size: 12px;
-      color: white;
-    }
-    
-    #header-counter{
-        margin-right: auto; /* Empuja el botón hacia la derecha */
-        font-size: 18px;
-        margin-left: 10px;
-        color: white;
-    }
-
-  
-    .table-header button {
-      background-color: #ffeb3b;
-      color: #333;
-      border: none;
-      padding: 6px 12px;
+      padding: 0.5em 1em;
+      border-radius: 0.4em;
+      font-size: 1.2em;
       cursor: pointer;
-      border-radius: 4px;
-      font-weight: bold;
-      margin-right: 10px;
-    }
-  
-    .incident-list {
-      padding: 10px;
-      background-color: #f4f8fc;
-      border-radius: 0 0 8px 8px;
-    }
-  
-    .incident-row {
-      display: flex;
-      align-items: center;
-      padding: 10px;
-      border-bottom: 1px solid #c3d3e5;
-    }
-  
-    .id-section {
-      display: flex;
-      align-items: center;
-      margin-right: 15px;
-    }
-  
-    .status-indicator {
-      width: 12px;
-      height: 12px;
-      border-radius: 4px;
-      margin-right: 8px;
-    }
-  
-    .incident-id {
-      font-weight: bold;
-      color: #333;
-    }
-  
-    .details-section {
-      display: flex;
-      flex-direction: column;
-    }
-  
-    .title {
-      color: #338fcc;
-      font-weight: bold;
-    }
-  
-    .date {
-      font-size: 12px;
-      color: #666;
-    }
-
-    /*LINEA DE  TIEMPO*/
-        .timeline {
-      background-color: #e3ecf7;
-      border: 1px solid #2a70b8;
-      border-radius: 5px;
-      padding: 10px;
-      margin-top: 15px;
-      flex: 1;
-      max-width: 300px;
-    }
-
-  .timeline-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 5px;
-    background-color: #2a70b8;
-    color: #ffffff;
-    font-weight: bold;
-    border-radius: 3px 3px 0 0;
   }
-
-  .timeline-content {
-    padding: 10px;
+  .envio:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
   }
+</style>
 
-  .timeline-event {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-    padding: 5px;
-    background-color: #ffffff;
-    border-radius: 3px;
-  }
-
-  .user-avatar {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    margin-right: 10px;
-  }
-
-  .event-details {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .user-name {
-    font-weight: bold;
-    color: #2a70b8;
-  }
-
-  .event-action {
-    color: #555;
-  }
-
-  .event-link {
-    color: #2a70b8;
-    text-decoration: underline;
-    cursor: pointer;
-  }
-
-  .event-date {
-    font-size: 0.8em;
-    color: #888;
-  }
-
-/* Media query para pantallas pequeñas */
-@media (max-width: 768px) {
-    .incident-table {
-        width: 90%; /* Se adapta al ancho completo de la pantalla */
-        max-width: none; /* Quita la restricción de tamaño fijo */
-    }
-
-    .container {
-    flex-direction: column;
-  }
-
-  .timeline {
-    max-width: none;
-    margin-top: 20px; /* Separación entre las tablas y la línea de tiempo */
-  }
-}
-  </style>
-  
+<!-- Formulario de Login -->
+<div class="principal">
+  <h1>Iniciar Sesión</h1>
+  <form on:submit|preventDefault={handleSubmit}>
+      <div>
+          <label for="name">Nombre:</label><br>
+          <input id="name" type="text" bind:value={$formData.name} />
+          {#if $formErrors.name}
+              <span class="error">{$formErrors.name}</span>
+          {/if}
+      </div>
+      <div>
+          <label for="email">Correo Electrónico:</label><br>
+          <input id="email" type="email" bind:value={$formData.email} />
+          {#if $formErrors.email}
+              <span class="error">{$formErrors.email}</span>
+          {/if}
+      </div>
+      <div>
+          <label for="password">Contraseña:</label><br>
+          <input id="password" type="password" bind:value={$formData.password} />
+          {#if $formErrors.password}
+              <span class="error">{$formErrors.password}</span>
+          {/if}
+      </div>
+      {#if $formErrors.general}
+          <div class="error">{$formErrors.general}</div>
+      {/if}
+      <button class="envio" type="submit" disabled={$isSubmitting}>Iniciar Sesión</button>
+  </form>
+</div>

@@ -85,6 +85,8 @@ def clienteDB():
     doc = data.get('uploadedFileUrl')
     ruc = data.get('ruc')
     
+    type = data.get('tipo')
+
     response = ""
     
     try:
@@ -95,7 +97,7 @@ def clienteDB():
         cursor.execute("INSERT INTO usuarios_cliente (ruc, id_usuario) VALUES (?, ?)", (ruc, last_id))
         
         #Crear documento
-        cursor.execute("INSERT INTO documentos (url_doc) VALUES (?)", (doc,))
+        cursor.execute("INSERT INTO documentos (url_doc, tipo) VALUES (?, ?)", (doc, type))
         last_id = cursor.lastrowid
         
         #Crear incidencia
@@ -138,12 +140,12 @@ def obtenerIncidencias():
     try:
         query = """
             SELECT i.id, i.resumen, i.descripcion, i.fecha_envio, 
-                   p.nombre AS proyecto, d.nombre AS departamento
+            p.nombre AS proyecto, d.nombre AS departamento
             FROM incidencias i
             LEFT JOIN proyectos p ON i.id_proyecto = p.id
             LEFT JOIN departamentos d ON i.id_departamento = d.id
             WHERE (i.id_proyecto = ? OR ? IS NULL)
-              AND (i.id_departamento = ? OR ? IS NULL)
+            AND (i.id_departamento = ? OR ? IS NULL)
         """
         params = (id_proyecto, id_proyecto, id_departamento, id_departamento)
         incidencias = cursor.execute(query, params).fetchall()
