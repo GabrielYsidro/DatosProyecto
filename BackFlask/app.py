@@ -77,26 +77,17 @@ def clienteDB():
     conn = conectarDB()
     cursor = conn.cursor()
     
-    name = data.get('name')
-    email = data.get('email')
-    contra = data.get('password')
-    
     summary = data.get('resumen')
     desc = data.get('descripcion')
     id_pro = data.get('proyecto')
     doc = data.get('uploadedFileUrl')
-    ruc = data.get('ruc')
     
     type = data.get('tipo')
 
     response = ""
     
+    
     try:
-        
-        #Crear usuario y usuario_cliente
-        cursor.execute("INSERT INTO usuarios (nombre, correo, contrasenha) VALUES (?, ?, ?)", (name,email,contra))
-        last_id = cursor.lastrowid
-        cursor.execute("INSERT INTO usuarios_cliente (ruc, id_usuario) VALUES (?, ?)", (ruc, last_id))
         
         #Crear documento
         cursor.execute("INSERT INTO documentos (url_doc, tipo) VALUES (?, ?)", (doc, type))

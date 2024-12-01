@@ -3,7 +3,6 @@
 <script>
     import { writable } from 'svelte/store';
     import { z } from 'zod';
-    import CargaArchivo from '../../componentes/CargaArchivo.svelte';
     import {fetchRecurso} from '../../servicios/buscarRecurso'
     import {onMount} from 'svelte'
     import {uploadFile} from '../../servicios/subirArchivo'
@@ -20,23 +19,18 @@
     });
     // Definir el esquema de validación usando Zod
     const formSchema = z.object({
-    name: z.string().min(1, "El nombre es requerido").max(50, "El nombre debe tener menos de 50 caracteres"),
-    email: z.string().email("Debes proporcionar un correo electrónico válido"),
-    password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres").regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/, "La contraseña debe contener al menos una letra mayúscula, una letra minúscula y un número"),
+    uploadedFileUrl: z.string().min(1, "El archivo es requerido"),
     resumen: z.string().min(1, "El resumen es requerido").max(50, "El resumen debe tener menos de 50 caracteres"),
     descripcion: z.string().min(1, "La descripción es requerida").max(500, "La descripción debe tener menos de 500 caracteres"),
-    ruc: z.string().min(10,"Minimo 11 digitos").max("Maximo 11 digitos").regex(/^\d+$/, "Solo numeros")
+    proyecto: z.number().min(1, "El proyecto es requerido"),
+    tipo: z.string().min(1, "El tipo es requerido")
     });
     
     // Estado para el formulario
     let formData = writable({
-    name: '',
-    email: '',
     uploadedFileUrl: '',
-    password: '',
     resumen: '',
     descripcion: '',
-    ruc: '',
     proyecto : '',
     tipo: 'incidencia'
     });
@@ -57,17 +51,6 @@
     formErrors.set({});
 
       // Validar los datos del formulario
-    const validationResult = formSchema.safeParse($formData);
-
-    if (!validationResult.success) {
-        // Si la validación falla, mostramos los errores
-        formErrors.set(validationResult.error.errors.reduce((acc, error) => {
-        acc[error.path[0]] = error.message;
-        return acc;
-        }, {}));
-    } else {
-        console.log("Formulario válido:", $formData);
-
         if (selectedFile) {
                 try {
                     const result = await uploadFile(selectedFile);
@@ -93,8 +76,20 @@
         });
 
         if(!response.ok) {
-
+            console.error("Error al enviar el formulario:", response.statusText);
         }
+
+        const validationResult = formSchema.safeParse($formData);
+
+        if (!validationResult.success) {
+            // Si la validación falla, mostramos los errores
+            formErrors.set(validationResult.error.errors.reduce((acc, error) => {
+            acc[error.path[0]] = error.message;
+            console.log("ERROR: ", error.message);
+            return acc;
+            }, {}));
+        } else {
+            console.log("Formulario válido:", $formData);
 
     }
 
@@ -148,7 +143,7 @@
         height:100%;
     }
 
-    #name, #email, #password, #resumen, #descripcion, #ruc {
+    #resumen, #descripcion {
         width: 80%;
         font-size: 1em;
         border-radius: 0.4em;
@@ -176,39 +171,7 @@
 <div class="principal">
 <h1>Formulario de contacto</h1>
     <form on:submit|preventDefault={handleSubmit}>
-        <div>
-        <label for="name">Nombre:</label><br>
-        <input id="name" type="text" bind:value={$formData.name} />
-        {#if $formErrors.name}
-            <span class="error">{$formErrors.name}</span>
-        {/if}
-        </div>
-    
-        <div>
-        <label for="email">Correo electrónico:</label><br>
-        <input id="email" type="email" bind:value={$formData.email} />
-        {#if $formErrors.email}
-            <span class="error">{$formErrors.email}</span>
-        {/if}
-        </div>
-    
-        <div>
-            <label for="password"> Password: </label><br>
-            <input id="password" type="password" bind:value={$formData.password} />
-            {#if $formErrors.password}
-                <span class="error">{$formErrors.password}</span>
-            {/if}
-        </div>
-
-
-        <div>
-            <label for="ruc"> RUC: </label><br>
-            <input id="ruc" type="ruc" bind:value={$formData.ruc} />
-            {#if $formErrors.ruc}
-                <span class="error">{$formErrors.ruc}</span>
-            {/if}
-        </div>
-    
+        
         <div> 
             <label for="proyectos"> Seleccione el proyecto sobre el que tiene una consulta: </label><br>
             <select id="proyectos" autocomplete="on" value={selectedProyectoName} on:change={handleChange}>
