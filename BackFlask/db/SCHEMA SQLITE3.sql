@@ -1,3 +1,150 @@
+CREATE TABLE etiquetas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE prioridades (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE documentos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    url_doc VARCHAR(200),
+    tipo VARCHAR(30)
+);
+	
+CREATE TABLE departamentos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE comentarios (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    contenido VARCHAR(200) NOT NULL,
+    fecha DATETIME NOT NULL,
+    id_analista INTEGER,
+    id_developer INTEGER,
+    FOREIGN KEY (id_analista) REFERENCES usuarios_analista(id),
+    FOREIGN KEY (id_developer) REFERENCES usuarios_developer(id)
+);
+
+CREATE TABLE estados (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre VARCHAR(50) NOT NULL,
+    url_imagen VARCHAR(200)
+);
+
+CREATE TABLE usuarios (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre VARCHAR(50) NOT NULL,
+    url_imagen VARCHAR(200),
+    correo VARCHAR(100) NOT NULL,
+    contrasenha VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE usuarios_cliente (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ruc VARCHAR(20) NOT NULL,
+    id_usuario INTEGER NOT NULL,
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id)
+    );
+	
+CREATE TABLE usuarios_analista (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_usuario INTEGER NOT NULL,
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id)
+);
+
+CREATE TABLE usuarios_developer (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    codigo VARCHAR(20) NOT NULL,
+    id_usuario INTEGER NOT NULL,
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id)
+);
+
+CREATE TABLE proyectos(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre VARCHAR(50) NOT NULL,
+    fecha_inicio DATE NOT NULL,
+    id_cliente INTEGER,
+    FOREIGN KEY (id_cliente) REFERENCES usuarios_cliente(id)
+);
+
+CREATE TABLE incidencias (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    resumen VARCHAR(50) NOT NULL,
+    descripcion VARCHAR(200) NOT NULL,
+    fecha_envio DATETIME NOT NULL,
+    fecha_actu DATETIME,
+    id_proyecto INTEGER NOT NULL,
+    id_departamento INTEGER ,
+    id_estado INTEGER ,
+    id_prioridad INTEGER ,
+    id_documento INTEGER,
+    FOREIGN KEY (id_proyecto) REFERENCES proyectos(id),
+    FOREIGN KEY (id_departamento) REFERENCES departamentos(id),
+    FOREIGN KEY (id_estado) REFERENCES estados(id),
+    FOREIGN KEY (id_prioridad) REFERENCES prioridades(id),
+    FOREIGN KEY (id_documento) REFERENCES documentos(id)
+);
+
+CREATE TABLE etiquetas_incidencias(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_incidencia INTEGER NOT NULL,
+    id_etiqueta INTEGER NOT NULL,
+    FOREIGN KEY (id_incidencia) REFERENCES incidencias(id),
+    FOREIGN KEY (id_etiqueta) REFERENCES etiquetas(id)
+);
+
+CREATE TABLE developer_departamentos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_developer INTEGER NOT NULL,
+    id_departamento INTEGER NOT NULL,
+    FOREIGN KEY (id_developer) REFERENCES usuarios_developer(id),
+    FOREIGN KEY (id_departamento) REFERENCES departamentos(id)
+);
+
+CREATE TABLE documento_comentarios (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_documento INTEGER NOT NULL,
+    id_comentario INTEGER NOT NULL,
+    FOREIGN KEY (id_documento) REFERENCES documentos(id),  
+    FOREIGN KEY (id_comentario) REFERENCES comentarios(id)
+);
+
+CREATE TABLE departamentos_proyecto(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_departamento INTEGER NOT NULL,
+    id_proyecto INTEGER NOT NULL,
+    FOREIGN KEY (id_departamento) REFERENCES departamentos(id),
+    FOREIGN KEY (id_proyecto) REFERENCES proyectos(id)
+);
+
+CREATE TABLE incidencia_cliente (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_incidencia INTEGER NOT NULL,
+    id_cliente INTEGER NOT NULL,
+    FOREIGN KEY (id_incidencia) REFERENCES incidencias(id),
+    FOREIGN KEY (id_cliente) REFERENCES usuarios_cliente(id)
+);
+
+CREATE TABLE incidencia_analista(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_incidencia INTEGER NOT NULL,
+    id_analista INTEGER NOT NULL,
+    FOREIGN KEY (id_incidencia) REFERENCES incidencias(id),
+    FOREIGN KEY (id_analista) REFERENCES usuarios_analista(id)
+);
+
+CREATE TABLE incidencia_developer(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_incidencia INTEGER NOT NULL,
+    id_developer INTEGER NOT NULL,
+    FOREIGN KEY (id_incidencia) REFERENCES incidencias(id),
+    FOREIGN KEY (id_developer) REFERENCES usuarios_developer(id)
+);
+
 INSERT INTO etiquetas (id, nombre) VALUES (1, 'Urgente');
 INSERT INTO etiquetas (id, nombre) VALUES (2, 'Bug');
 INSERT INTO etiquetas (id, nombre) VALUES (3, 'Mejora');
@@ -20,33 +167,115 @@ INSERT INTO departamentos (id, nombre) VALUES (8, 'Compras');
 INSERT INTO departamentos (id, nombre) VALUES (9, 'Atencion al Cliente');
 INSERT INTO departamentos (id, nombre) VALUES (10, 'Produccion');
 
-INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario1.pdf', 'comentario'); 
-INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia1.pdf', 'incidencia');
-INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario2.pdf', 'comentario'); 
-INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia2.pdf', 'incidencia'); 
-INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario3.pdf', 'comentario'); 
-INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia3.pdf', 'incidencia'); 
-INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario4.pdf', 'comentario');
+-- migrate:up
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario1.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia2.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario3.pdf', 'comentario');
 INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia4.pdf', 'incidencia');
-INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario5.pdf', 'comentario'); 
-INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia5.pdf', 'incidencia'); 
-INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario6.pdf', 'comentario');
-INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia6.pdf', 'incidencia'); 
-INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario7.pdf', 'comentario'); 
-INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia7.pdf', 'incidencia');
-INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario8.pdf', 'comentario');
-INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia8.pdf', 'incidencia'); 
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario5.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia6.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario7.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia8.pdf', 'incidencia');
 INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario9.pdf', 'comentario');
-INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia9.pdf', 'incidencia'); 
-INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario10.pdf', 'comentario'); 
-INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia10.pdf', 'incidencia'); 
-
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia10.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario11.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia12.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario13.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia14.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario15.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia16.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario17.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia18.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario19.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia20.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario21.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia22.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario23.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia24.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario25.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia26.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario27.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia28.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario29.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia30.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario31.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia32.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario33.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia34.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario35.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia36.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario37.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia38.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario39.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia40.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario41.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia42.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario43.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia44.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario45.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia46.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario47.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia48.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario49.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia50.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario51.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia52.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario53.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia54.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario55.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia56.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario57.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia58.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario59.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia60.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario61.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia62.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario63.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia64.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario65.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia66.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario67.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia68.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario69.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia70.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario71.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia72.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario73.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia74.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario75.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia76.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario77.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia78.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario79.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia80.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario81.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia82.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario83.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia84.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario85.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia86.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario87.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia88.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario89.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia90.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario91.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia92.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario93.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia94.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario95.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia96.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario97.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia98.pdf', 'incidencia');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/comentario99.pdf', 'comentario');
+INSERT INTO documentos (url_doc, tipo) VALUES ('http://example.com/incidencia100.pdf', 'incidencia');
 
 INSERT INTO estados (id, nombre, url_imagen) VALUES (1, 'Activo', 'https://example.com/activo.jpg');
 INSERT INTO estados (id, nombre, url_imagen) VALUES (2, 'Inactivo', 'https://example.com/inactivo.jpg');
 INSERT INTO estados (id, nombre, url_imagen) VALUES (3, 'Pendiente', 'https://example.com/pendiente.jpg');
 INSERT INTO estados (id, nombre, url_imagen) VALUES (4, 'Finalizado', 'https://example.com/finalizado.jpg');
 
+
+--migrate:up
 INSERT INTO usuarios (id, nombre, url_imagen, correo, contrasenha) VALUES (1, 'Kailey', 'http://dummyimage.com/147x100.png/dddddd/000000', 'kautry0@telegraph.co.uk', 'P7mZ2gLx3aVq49F');
 INSERT INTO usuarios (id, nombre, url_imagen, correo, contrasenha) VALUES (2, 'Flossy', 'http://dummyimage.com/100x100.png/ff4444/ffffff', 'fmcgowan1@kickstarter.com', 'XmL72Qd8nTYp36K');
 INSERT INTO usuarios (id, nombre, url_imagen, correo, contrasenha) VALUES (3, 'Penelopa', 'http://dummyimage.com/134x100.png/dddddd/000000', 'pcrayker2@youtu.be', 'Zp4nXw37MvL82gJ');
@@ -348,7 +577,7 @@ INSERT INTO usuarios (id, nombre, url_imagen, correo, contrasenha) VALUES (298, 
 INSERT INTO usuarios (id, nombre, url_imagen, correo, contrasenha) VALUES (299, 'Aldis', 'http://dummyimage.com/208x100.png/cc0000/ffffff', 'aquarless8a@gizmodo.com', 'mL7nT9Kq5V82Z3Xp');
 INSERT INTO usuarios (id, nombre, url_imagen, correo, contrasenha) VALUES (300, 'Karel', 'http://dummyimage.com/179x100.png/5fa2dd/ffffff', 'kbloxland8b@weibo.com', 'VZ5K7TnLm93Xp82q');
 
-
+-- migrate:up
 INSERT INTO usuarios_cliente (ruc, id_usuario) VALUES ('1014496537', 1);
 INSERT INTO usuarios_cliente (ruc, id_usuario) VALUES ('1089551287', 3);
 INSERT INTO usuarios_cliente (ruc, id_usuario) VALUES ('1026209015', 5);
@@ -500,12 +729,11 @@ INSERT INTO usuarios_cliente (ruc, id_usuario) VALUES ('1091374151', 295);
 INSERT INTO usuarios_cliente (ruc, id_usuario) VALUES ('1049427829', 297);
 INSERT INTO usuarios_cliente (ruc, id_usuario) VALUES ('1061185207', 299);
 
-
 INSERT INTO usuarios_analista (id_usuario) VALUES (100);
 INSERT INTO usuarios_analista (id_usuario) VALUES (200);
 INSERT INTO usuarios_analista (id_usuario) VALUES (300);
 
-
+-- migrate:up
 INSERT INTO usuarios_developer (codigo, id_usuario) VALUES ('DEV002', 2);
 INSERT INTO usuarios_developer (codigo, id_usuario) VALUES ('DEV004', 4);
 INSERT INTO usuarios_developer (codigo, id_usuario) VALUES ('DEV006', 6);
@@ -655,12 +883,6 @@ INSERT INTO usuarios_developer (codigo, id_usuario) VALUES ('DEV294', 294);
 INSERT INTO usuarios_developer (codigo, id_usuario) VALUES ('DEV296', 296);
 INSERT INTO usuarios_developer (codigo, id_usuario) VALUES ('DEV298', 298);
 
-
-
-
-
-
-
 INSERT INTO proyectos (nombre, fecha_inicio, id_cliente) VALUES ('Proyecto A', '2024-01-01', 1);
 INSERT INTO proyectos (nombre, fecha_inicio, id_cliente) VALUES ('Proyecto B', '2024-02-15', 2);
 INSERT INTO proyectos (nombre, fecha_inicio, id_cliente) VALUES ('Proyecto C', '2024-03-20', 3);
@@ -682,9 +904,7 @@ INSERT INTO proyectos (nombre, fecha_inicio, id_cliente) VALUES ('Proyecto R', '
 INSERT INTO proyectos (nombre, fecha_inicio, id_cliente) VALUES ('Proyecto S', '2025-07-12', 19);
 INSERT INTO proyectos (nombre, fecha_inicio, id_cliente) VALUES ('Proyecto T', '2025-08-25', 20);
 
-
-
-
+-- migrate:up
 INSERT INTO incidencias (resumen, descripcion, fecha_envio, fecha_actu, id_proyecto, id_departamento, id_estado, id_prioridad, id_documento)
 VALUES ('Incidencia A', 'Descripción de la incidencia A', '2024-01-01 10:00:00', '2024-01-02 14:00:00', 1, 1, 1, 1, 2);
 
@@ -1148,404 +1368,314 @@ INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (146,
 INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (146, 10);
 INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (146, 8);
 INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (146, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (148, 4);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (148, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (148, 10);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (148, 3);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (148, 2);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (148, 7);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (148, 9);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (148, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (150, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (150, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (150, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (150, 2);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (150, 10);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (150, 3);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (152, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (152, 9);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (152, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (152, 4);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (152, 10);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (152, 2);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (154, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (154, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (156, 2);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (158, 2);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (158, 7);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (158, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (158, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (158, 9);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (158, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (158, 10);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (158, 4);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (158, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (160, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (162, 9);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (162, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (164, 4);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (164, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (164, 9);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (164, 2);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (164, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (164, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (166, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (166, 10);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (166, 4);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (166, 7);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (166, 3);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (166, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (166, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (166, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (166, 2);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (168, 9);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (168, 10);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (168, 3);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (168, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (168, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (168, 2);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (168, 7);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (168, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (170, 7);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (170, 2);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (170, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (170, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (172, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (172, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (172, 10);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (174, 7);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (174, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (174, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (174, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (174, 2);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (176, 2);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (176, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (176, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (176, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (176, 9);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (176, 3);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (176, 10);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (176, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (178, 9);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (178, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (180, 7);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (180, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (182, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (182, 10);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (182, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (182, 4);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (184, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (184, 2);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (184, 3);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (184, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (184, 10);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (184, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (186, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (186, 10);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (186, 2);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (186, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (186, 7);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (186, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (186, 4);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (186, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (188, 7);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (188, 10);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (188, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (188, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (188, 4);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (188, 3);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (188, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (190, 10);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (190, 3);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (192, 2);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (192, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (192, 3);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (192, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (192, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (192, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (192, 4);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (192, 9);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (194, 9);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (194, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (194, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (194, 7);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (194, 4);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (194, 2);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (194, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (196, 3);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (198, 3);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (198, 2);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (198, 10);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (198, 9);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (198, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (198, 7);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (198, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (200, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (202, 9);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (202, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (202, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (202, 3);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (204, 4);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (204, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (204, 7);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (204, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (206, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (206, 2);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (206, 10);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (206, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (206, 9);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (206, 4);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (206, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (206, 7);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (206, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (208, 9);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (208, 4);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (208, 3);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (208, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (208, 2);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (208, 7);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (210, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (212, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (214, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (214, 10);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (214, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (214, 2);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (214, 4);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (214, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (214, 3);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (214, 9);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (216, 10);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (216, 4);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (216, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (216, 3);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (216, 7);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (216, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (216, 9);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (216, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (216, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (218, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (218, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (218, 4);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (220, 7);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (220, 3);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (220, 9);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (220, 4);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (220, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (220, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (222, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (222, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (224, 3);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (224, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (224, 10);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (224, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (226, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (226, 2);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (228, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (230, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (230, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (230, 9);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (230, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (230, 10);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (230, 7);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (230, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (232, 10);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (232, 2);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (232, 3);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (232, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (232, 4);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (232, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (232, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (232, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (234, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (234, 3);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (234, 9);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (234, 10);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (234, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (234, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (236, 4);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (236, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (236, 10);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (238, 3);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (238, 10);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (238, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (238, 9);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (238, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (238, 4);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (240, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (240, 4);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (240, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (240, 2);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (240, 3);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (242, 9);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (242, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (242, 4);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (242, 2);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (242, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (242, 10);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (244, 9);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (244, 7);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (244, 3);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (244, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (246, 7);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (246, 3);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (246, 4);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (248, 2);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (248, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (248, 7);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (248, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (248, 9);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (248, 10);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (248, 3);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (248, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (248, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (248, 4);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (250, 10);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (250, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (250, 7);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (250, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (250, 2);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (250, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (250, 4);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (250, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (250, 9);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (250, 3);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (252, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (252, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (252, 9);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (252, 7);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (252, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (252, 3);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (252, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (252, 2);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (254, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (254, 9);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (254, 3);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (254, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (254, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (254, 4);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (254, 10);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (254, 2);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (256, 3);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (256, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (256, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (258, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (258, 2);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (258, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (260, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (260, 2);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (260, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (260, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (260, 9);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (260, 4);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (260, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (260, 7);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (260, 10);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (260, 3);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (262, 3);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (264, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (264, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (264, 3);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (266, 4);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (266, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (268, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (268, 10);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (268, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (268, 7);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (270, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (270, 3);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (270, 2);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (270, 4);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (270, 7);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (270, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (270, 9);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (272, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (272, 2);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (272, 3);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (272, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (272, 4);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (272, 9);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (272, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (274, 3);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (274, 9);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (274, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (274, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (274, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (274, 2);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (274, 7);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (274, 4);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (274, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (276, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (276, 10);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (276, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (276, 4);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (276, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (278, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (278, 7);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (278, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (278, 9);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (280, 10);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (280, 9);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (280, 2);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (280, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (280, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (280, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (280, 7);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (280, 3);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (280, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (282, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (282, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (284, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (284, 10);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (284, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (284, 9);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (284, 3);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (284, 7);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (284, 4);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (284, 2);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (284, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (284, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (286, 7);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (286, 3);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (286, 10);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (286, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (286, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (286, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (286, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (286, 4);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (286, 9);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (286, 2);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (288, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (288, 9);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (290, 7);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (290, 6);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (290, 4);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (290, 2);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (290, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (290, 5);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (292, 10);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (294, 3);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (296, 7);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (296, 3);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (296, 1);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (296, 10);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (296, 9);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (296, 4);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (296, 2);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (296, 8);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (298, 9);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (298, 4);
-INSERT INTO developer_departamentos (id_developer, id_departamento) VALUES (298, 1);
 
-INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (1, 1);
-INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (3, 2);
-INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (5, 3);
-INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (7, 4);
-INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (9, 5);
-INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (11, 6);
-INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (13, 7);
-INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (15, 8);
-INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (17, 9);
-INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (19, 10);
+
+
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 1', '2024-11-25 16:21:16', 2, 141);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 2', '2024-11-25 16:21:16', 2, 107);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 3', '2024-11-29 16:21:16', 2, 113);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 4', '2024-11-29 16:21:16', 1, 28);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 5', '2024-11-02 16:21:16', 2, 128);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 6', '2024-11-16 16:21:16', 2, 17);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 7', '2024-11-20 16:21:16', 1, 50);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 8', '2024-11-27 16:21:16', 2, 63);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 9', '2024-11-07 16:21:16', 3, 66);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 10', '2024-11-29 16:21:16', 1, 54);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 11', '2024-11-06 16:21:16', 2, 87);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 12', '2024-11-03 16:21:16', 2, 48);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 13', '2024-11-14 16:21:16', 3, 88);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 14', '2024-11-29 16:21:16', 1, 114);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 15', '2024-11-30 16:21:16', 1, 95);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 16', '2024-11-28 16:21:16', 1, 77);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 17', '2024-12-01 16:21:16', 3, 96);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 18', '2024-11-29 16:21:16', 1, 30);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 19', '2024-11-03 16:21:16', 1, 53);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 20', '2024-11-19 16:21:16', 1, 143);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 21', '2024-11-03 16:21:16', 2, 58);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 22', '2024-11-28 16:21:16', 1, 115);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 23', '2024-11-30 16:21:16', 3, 139);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 24', '2024-11-08 16:21:16', 2, 135);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 25', '2024-11-21 16:21:16', 1, 131);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 26', '2024-11-25 16:21:16', 1, 144);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 27', '2024-11-14 16:21:16', 2, 97);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 28', '2024-11-12 16:21:16', 2, 70);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 29', '2024-11-24 16:21:16', 1, 107);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 30', '2024-11-13 16:21:16', 3, 136);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 31', '2024-11-06 16:21:16', 1, 138);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 32', '2024-11-07 16:21:16', 2, 146);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 33', '2024-11-30 16:21:16', 2, 109);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 34', '2024-11-05 16:21:16', 1, 13);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 35', '2024-11-25 16:21:16', 3, 34);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 36', '2024-11-15 16:21:16', 1, 77);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 37', '2024-11-15 16:21:16', 2, 101);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 38', '2024-11-17 16:21:16', 2, 50);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 39', '2024-12-01 16:21:16', 1, 12);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 40', '2024-11-26 16:21:16', 2, 111);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 41', '2024-11-06 16:21:16', 3, 129);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 42', '2024-11-27 16:21:16', 2, 105);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 43', '2024-11-02 16:21:16', 3, 72);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 44', '2024-11-06 16:21:16', 3, 10);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 45', '2024-12-01 16:21:16', 2, 113);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 46', '2024-11-29 16:21:16', 2, 94);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 47', '2024-11-18 16:21:16', 2, 50);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 48', '2024-11-29 16:21:16', 2, 47);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 49', '2024-11-20 16:21:16', 3, 48);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 50', '2024-11-25 16:21:16', 2, 84);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 51', '2024-11-05 16:21:16', 1, 72);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 52', '2024-12-01 16:21:16', 1, 118);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 53', '2024-11-15 16:21:16', 2, 30);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 54', '2024-11-25 16:21:16', 1, 18);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 55', '2024-11-07 16:21:16', 3, 66);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 56', '2024-11-07 16:21:16', 2, 25);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 57', '2024-11-24 16:21:16', 1, 132);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 58', '2024-11-24 16:21:16', 1, 116);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 59', '2024-11-19 16:21:16', 1, 107);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 60', '2024-11-08 16:21:16', 2, 147);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 61', '2024-11-12 16:21:16', 1, 15);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 62', '2024-11-01 16:21:16', 2, 22);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 63', '2024-11-07 16:21:16', 2, 9);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 64', '2024-11-02 16:21:16', 2, 48);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 65', '2024-11-18 16:21:16', 1, 130);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 66', '2024-11-13 16:21:16', 1, 41);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 67', '2024-12-01 16:21:16', 2, 115);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 68', '2024-11-14 16:21:16', 3, 9);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 69', '2024-11-01 16:21:16', 1, 47);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 70', '2024-11-20 16:21:16', 3, 42);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 71', '2024-11-28 16:21:16', 1, 16);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 72', '2024-11-25 16:21:16', 3, 127);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 73', '2024-11-11 16:21:16', 2, 32);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 74', '2024-11-18 16:21:16', 2, 12);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 75', '2024-11-15 16:21:16', 2, 12);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 76', '2024-11-20 16:21:16', 1, 137);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 77', '2024-11-02 16:21:16', 3, 120);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 78', '2024-11-25 16:21:16', 3, 37);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 79', '2024-11-21 16:21:16', 2, 30);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 80', '2024-11-01 16:21:16', 1, 133);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 81', '2024-11-12 16:21:16', 2, 6);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 82', '2024-11-22 16:21:16', 2, 80);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 83', '2024-11-26 16:21:16', 3, 49);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 84', '2024-11-30 16:21:16', 1, 119);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 85', '2024-11-12 16:21:16', 1, 16);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 86', '2024-11-14 16:21:16', 2, 144);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 87', '2024-11-17 16:21:16', 3, 50);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 88', '2024-11-30 16:21:16', 2, 138);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 89', '2024-11-21 16:21:16', 1, 119);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 90', '2024-11-22 16:21:16', 3, 36);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 91', '2024-11-16 16:21:16', 2, 60);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 92', '2024-11-28 16:21:16', 2, 122);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 93', '2024-11-11 16:21:16', 1, 119);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 94', '2024-11-25 16:21:16', 1, 24);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 95', '2024-11-28 16:21:16', 3, 89);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 96', '2024-11-11 16:21:16', 2, 21);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 97', '2024-12-01 16:21:16', 1, 51);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 98', '2024-11-26 16:21:16', 2, 122);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 99', '2024-11-30 16:21:16', 3, 9);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 100', '2024-11-26 16:21:16', 2, 78);
+
+-- migrate:up
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 1', '2024-11-25 16:21:16', 2, 141);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 2', '2024-11-25 16:21:16', 2, 107);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 3', '2024-11-29 16:21:16', 2, 113);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 4', '2024-11-29 16:21:16', 1, 28);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 5', '2024-11-02 16:21:16', 2, 128);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 6', '2024-11-16 16:21:16', 2, 17);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 7', '2024-11-20 16:21:16', 1, 50);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 8', '2024-11-27 16:21:16', 2, 63);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 9', '2024-11-07 16:21:16', 3, 66);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 10', '2024-11-29 16:21:16', 1, 54);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 11', '2024-11-06 16:21:16', 2, 87);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 12', '2024-11-03 16:21:16', 2, 48);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 13', '2024-11-14 16:21:16', 3, 88);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 14', '2024-11-29 16:21:16', 1, 114);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 15', '2024-11-30 16:21:16', 1, 95);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 16', '2024-11-28 16:21:16', 1, 77);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 17', '2024-12-01 16:21:16', 3, 96);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 18', '2024-11-29 16:21:16', 1, 30);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 19', '2024-11-03 16:21:16', 1, 53);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 20', '2024-11-19 16:21:16', 1, 143);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 21', '2024-11-03 16:21:16', 2, 58);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 22', '2024-11-28 16:21:16', 1, 115);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 23', '2024-11-30 16:21:16', 3, 139);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 24', '2024-11-08 16:21:16', 2, 135);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 25', '2024-11-21 16:21:16', 1, 131);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 26', '2024-11-25 16:21:16', 1, 144);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 27', '2024-11-14 16:21:16', 2, 97);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 28', '2024-11-12 16:21:16', 2, 70);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 29', '2024-11-24 16:21:16', 1, 107);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 30', '2024-11-13 16:21:16', 3, 136);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 31', '2024-11-06 16:21:16', 1, 138);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 32', '2024-11-07 16:21:16', 2, 146);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 33', '2024-11-30 16:21:16', 2, 109);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 34', '2024-11-05 16:21:16', 1, 13);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 35', '2024-11-25 16:21:16', 3, 34);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 36', '2024-11-15 16:21:16', 1, 77);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 37', '2024-11-15 16:21:16', 2, 101);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 38', '2024-11-17 16:21:16', 2, 50);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 39', '2024-12-01 16:21:16', 1, 12);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 40', '2024-11-26 16:21:16', 2, 111);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 41', '2024-11-06 16:21:16', 3, 129);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 42', '2024-11-27 16:21:16', 2, 105);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 43', '2024-11-02 16:21:16', 3, 72);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 44', '2024-11-06 16:21:16', 3, 10);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 45', '2024-12-01 16:21:16', 2, 113);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 46', '2024-11-29 16:21:16', 2, 94);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 47', '2024-11-18 16:21:16', 2, 50);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 48', '2024-11-29 16:21:16', 2, 47);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 49', '2024-11-20 16:21:16', 3, 48);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 50', '2024-11-25 16:21:16', 2, 84);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 51', '2024-11-05 16:21:16', 1, 72);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 52', '2024-12-01 16:21:16', 1, 118);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 53', '2024-11-15 16:21:16', 2, 30);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 54', '2024-11-25 16:21:16', 1, 18);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 55', '2024-11-07 16:21:16', 3, 66);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 56', '2024-11-07 16:21:16', 2, 25);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 57', '2024-11-24 16:21:16', 1, 132);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 58', '2024-11-24 16:21:16', 1, 116);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 59', '2024-11-19 16:21:16', 1, 107);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 60', '2024-11-08 16:21:16', 2, 147);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 61', '2024-11-12 16:21:16', 1, 15);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 62', '2024-11-01 16:21:16', 2, 22);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 63', '2024-11-07 16:21:16', 2, 9);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 64', '2024-11-02 16:21:16', 2, 48);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 65', '2024-11-18 16:21:16', 1, 130);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 66', '2024-11-13 16:21:16', 1, 41);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 67', '2024-12-01 16:21:16', 2, 115);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 68', '2024-11-14 16:21:16', 3, 9);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 69', '2024-11-01 16:21:16', 1, 47);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 70', '2024-11-20 16:21:16', 3, 42);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 71', '2024-11-28 16:21:16', 1, 16);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 72', '2024-11-25 16:21:16', 3, 127);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 73', '2024-11-11 16:21:16', 2, 32);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 74', '2024-11-18 16:21:16', 2, 12);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 75', '2024-11-15 16:21:16', 2, 12);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 76', '2024-11-20 16:21:16', 1, 137);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 77', '2024-11-02 16:21:16', 3, 120);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 78', '2024-11-25 16:21:16', 3, 37);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 79', '2024-11-21 16:21:16', 2, 30);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 80', '2024-11-01 16:21:16', 1, 133);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 81', '2024-11-12 16:21:16', 2, 6);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 82', '2024-11-22 16:21:16', 2, 80);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 83', '2024-11-26 16:21:16', 3, 49);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 84', '2024-11-30 16:21:16', 1, 119);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 85', '2024-11-12 16:21:16', 1, 16);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 86', '2024-11-14 16:21:16', 2, 144);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 87', '2024-11-17 16:21:16', 3, 50);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 88', '2024-11-30 16:21:16', 2, 138);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 89', '2024-11-21 16:21:16', 1, 119);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 90', '2024-11-22 16:21:16', 3, 36);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 91', '2024-11-16 16:21:16', 2, 60);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 92', '2024-11-28 16:21:16', 2, 122);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 93', '2024-11-11 16:21:16', 1, 119);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 94', '2024-11-25 16:21:16', 1, 24);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 95', '2024-11-28 16:21:16', 3, 89);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 96', '2024-11-11 16:21:16', 2, 21);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 97', '2024-12-01 16:21:16', 1, 51);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 98', '2024-11-26 16:21:16', 2, 122);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 99', '2024-11-30 16:21:16', 3, 9);
+INSERT INTO comentarios (contenido, fecha, id_analista, id_developer) VALUES ('Comentario de prueba 100', '2024-11-26 16:21:16', 2, 78);
+
+
+
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (41, 55);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (85, 69);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (1, 75);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (39, 96);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (39, 3);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (69, 2);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (57, 95);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (67, 14);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (45, 64);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (51, 80);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (1, 34);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (91, 52);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (57, 45);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (55, 45);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (53, 26);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (29, 62);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (19, 31);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (19, 21);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (55, 39);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (83, 30);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (79, 26);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (91, 34);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (55, 34);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (79, 15);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (83, 56);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (39, 2);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (5, 95);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (45, 15);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (27, 28);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (9, 81);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (93, 69);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (11, 25);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (53, 92);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (31, 44);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (61, 47);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (29, 75);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (65, 9);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (89, 9);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (99, 56);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (55, 77);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (89, 17);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (85, 40);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (81, 83);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (49, 87);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (57, 65);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (87, 43);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (83, 22);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (17, 32);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (89, 4);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (65, 58);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (13, 63);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (79, 78);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (49, 2);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (1, 33);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (27, 97);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (71, 11);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (67, 34);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (55, 59);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (75, 62);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (77, 42);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (33, 68);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (17, 98);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (61, 65);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (63, 41);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (63, 33);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (29, 31);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (9, 57);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (69, 98);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (29, 17);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (13, 43);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (43, 75);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (11, 90);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (45, 27);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (25, 54);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (87, 97);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (15, 68);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (43, 63);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (15, 84);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (37, 40);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (75, 78);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (33, 43);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (71, 22);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (87, 85);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (55, 40);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (19, 65);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (1, 25);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (9, 40);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (61, 51);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (49, 33);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (33, 19);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (71, 71);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (55, 75);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (57, 40);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (7, 85);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (9, 8);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (65, 14);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (79, 78);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (11, 28);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (3, 99);
+INSERT INTO documento_comentarios (id_documento, id_comentario) VALUES (9, 2);
 
 INSERT INTO incidencia_cliente (id_incidencia, id_cliente) VALUES (9, 1);
 INSERT INTO incidencia_cliente (id_incidencia, id_cliente) VALUES (3, 1);
@@ -1568,7 +1698,6 @@ INSERT INTO incidencia_cliente (id_incidencia, id_cliente) VALUES (9, 9);
 INSERT INTO incidencia_cliente (id_incidencia, id_cliente) VALUES (2, 10);
 INSERT INTO incidencia_cliente (id_incidencia, id_cliente) VALUES (4, 10);
 
-
 INSERT INTO incidencia_analista (id_incidencia, id_analista) VALUES (1, 2);
 INSERT INTO incidencia_analista (id_incidencia, id_analista) VALUES (2, 3);
 INSERT INTO incidencia_analista (id_incidencia, id_analista) VALUES (3, 1);
@@ -1588,7 +1717,6 @@ INSERT INTO incidencia_analista (id_incidencia, id_analista) VALUES (2, 1);
 INSERT INTO incidencia_analista (id_incidencia, id_analista) VALUES (4, 3);
 INSERT INTO incidencia_analista (id_incidencia, id_analista) VALUES (1, 1);
 INSERT INTO incidencia_analista (id_incidencia, id_analista) VALUES (9, 2);
-
 
 INSERT INTO incidencia_developer (id_incidencia, id_developer) VALUES (1, 147);
 INSERT INTO incidencia_developer (id_incidencia, id_developer) VALUES (2, 102);
@@ -1625,3 +1753,14 @@ INSERT INTO etiquetas_incidencias (id_incidencia, id_etiqueta) VALUES (7, 1); --
 INSERT INTO etiquetas_incidencias (id_incidencia, id_etiqueta) VALUES (8, 2); -- Incidencia H es un Bug
 INSERT INTO etiquetas_incidencias (id_incidencia, id_etiqueta) VALUES (9, 3); -- Incidencia I es una Mejora
 INSERT INTO etiquetas_incidencias (id_incidencia, id_etiqueta) VALUES (10, 4); -- Incidencia J está en Producción
+
+-- migrate:up
+
+
+
+
+
+
+
+
+
