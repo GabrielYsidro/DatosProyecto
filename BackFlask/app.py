@@ -64,7 +64,6 @@ def obtenerRecurso(recurso):
     conn.close()
     return jsonify(resultado)
 
-#Ruta para postear datos de cliente
 @app.route('/clienteDB', methods=['POST'])
 def clienteDB():
     data = request.get_json()
