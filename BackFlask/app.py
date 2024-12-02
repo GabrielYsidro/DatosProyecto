@@ -77,41 +77,32 @@ def clienteDB():
     data = request.get_json()
     if not data:
         return jsonify({"error": "No se enviaron datos"}), 400
-    
     print("Datos recibidos:", data)
-    
     conn = conectarDB()
     cursor = conn.cursor()
-    
     summary = data.get('resumen')
     desc = data.get('descripcion')
     id_pro = data.get('proyecto')
     doc = data.get('uploadedFileUrl')
-    
     type = data.get('tipo')
-
     response = ""
-    
-    
     try:
-        
+    
         #Crear documento
         cursor.execute("INSERT INTO documentos (url_doc, tipo) VALUES (?, ?)", (doc, type))
         last_id = cursor.lastrowid
-        
         #Crear incidencia
-        cursor.execute("INSERT INTO incidencias (resumen, descripcion, fecha_envio, id_proyecto, id_documento) VALUES (?, ?, DATETIME('now'), ?, ?)", (summary, desc, id_pro,last_id))
+        cursor.execute("INSERT INTO incidencias (resumen, descripcion, fecha_envio, id_proyecto, id_documento) VALUES (?, ?, DATETIME('now'), ?, ?)", 
+        (summary, desc, id_pro,last_id))
         conn.commit()
         response = {"message": "Data inserted successfully"}
         print("PASE")
-        
     except sqlite3.Error as e:
         conn.rollback()
         print(str(e))
         print("ERROR")
     finally:
         conn.close()
-    
     return jsonify(response)
 
 @app.route('/api/incidencias/<int:id>')
@@ -201,7 +192,8 @@ def incidencia_detalle(id):
         try:
     
             # Actualizar la incidencia
-            cursor.execute(f"UPDATE incidencias SET {set_clause}, fecha_actu = DATETIME('now') WHERE id = ?", valores_lista)
+            cursor.execute(f"UPDATE incidencias SET {set_clause}, fecha_actu = DATETIME('now') WHERE id = ?",
+            valores_lista)
            
             # Actualizar las etiquetas
             tags = data.get('tags', [])
@@ -212,7 +204,8 @@ def incidencia_detalle(id):
             cursor.execute("DELETE FROM etiquetas_incidencias WHERE id_incidencia = ?", (id,))
             
             # Insertar las nuevas etiquetas
-            cursor.executemany("INSERT INTO etiquetas_incidencias (id_incidencia, id_etiqueta) VALUES (?, ?)", [(id, tag) for tag in tags])
+            cursor.executemany("INSERT INTO etiquetas_incidencias (id_incidencia, id_etiqueta) VALUES (?, ?)",
+            [(id, tag) for tag in tags])
             
             conn.commit()
         except sqlite3.Error as e:
